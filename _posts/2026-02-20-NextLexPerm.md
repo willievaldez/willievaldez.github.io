@@ -13,7 +13,7 @@ rearranging any number of letters such that we get the closest word that comes *
 
 So, breaking this down, in order to construct a word that comes after the given word, we must start by taking a "bigger" letter
 and replacing it with a "smaller" letter that occurs earlier in the word. If we don't do this, the newly created word won't necessarily
-be "greater" than the given word.
+come after the given word in our dictionary.
 
 The next thing I noticed is that we should prioritize rearranging letters that are at the end of the word,
 that would give us the change with the lowest impact on a word's "score". So, my first plan of action is
@@ -28,11 +28,15 @@ This will minimize the spash damage on our new word's "score".
 The whole solution is incredibly compact in C++:
 
 ```cpp
-string biggerIsGreater(string w) {   
+string biggerIsGreater(string w) {
+    // Starting from the end of the string, evaluate each position (i)
     for (int i = w.length() - 2; i >= 0; --i)
     {
+        //  Look at the letters *after* the current position (j)
         for (int j = w.length() - 1; j > i; --j)
         {
+            // If a greater letter is found, swap them and
+            // sort the remaining substring
             if (w[j] > w[i])
             {
                 swap(w[j], w[i]);
@@ -45,3 +49,8 @@ string biggerIsGreater(string w) {
     return "no answer";
 }
 ```
+If we really wanted to optimize this, we could probably sort the remaining substring while we are iterating and finding candidates
+for the swap, but I'll leave that as an exercise to the reader :)
+
+> **Disclaimer**: The simplest solution is to use the [std::next_permutation](https://en.cppreference.com/w/cpp/algorithm/next_permutation.html) method,
+> but I consider that cheating for this exercise
