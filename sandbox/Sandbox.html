@@ -79,6 +79,7 @@ full-width: true
 
         function onColorChanged()
         {
+          Ctx.fillStyle = `rgb(${dqsValue('#red-slider')} ${dqsValue('#green-slider')} ${dqsValue('#blue-slider')})`;
           document.querySelector(`#final-color-preview`).style.backgroundColor = `rgb(${dqsValue('#red-slider')}, ${dqsValue('#green-slider')}, ${dqsValue('#blue-slider')})`;
           document.querySelector(`#final-color-text`).textContent = Ctx.fillStyle;
         }
