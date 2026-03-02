@@ -56,8 +56,8 @@ function AddMouseListeners()
         let rectHeight = rect.bottom - rect.top; 
         for (const changedTouch of evt.changedTouches) {
             MouseState.pos = {
-                x: (changedTouch.pageX - rect.left) / rectWidth,
-                y: (changedTouch.pageY - rect.top) / rectHeight
+                x: (changedTouch.pageX - rect.left - window.scrollX) / rectWidth,
+                y: (changedTouch.pageY - rect.top - window.scrollY) / rectHeight
             };
             drawFn();
         }
