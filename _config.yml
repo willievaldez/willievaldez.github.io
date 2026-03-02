@@ -213,7 +213,7 @@ defaults:
     scope:
       path: "sandbox" # any file in 'sandbox' will be a "page" layout by default
     values:
-      layout: "page"
+      layout: "base"
 
 # Exclude these files from production site
 exclude:
