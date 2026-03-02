@@ -1,0 +1,85 @@
+<html>
+  <head>
+    <link rel="stylesheet" href="Style/base.css">
+  </head>
+  <body>
+    <script src="Script/CanvasHelpers.js"></script>
+    <script src="Script/PaintColors.js"></script>
+    <canvas id="canvas-view">
+      Your browser does not seem to support HTML canvas.
+    </canvas>
+    <div class="flex">
+      <!-- <input type="text" id="color-text" value = "#0000ff"> </input> -->
+      <p id="pen-size-text">
+        Pen Size: 50
+      </p>
+      <input id="pen-size-slider" type="range" min="1" max="100" value="50">
+    </div>
+    
+    <table style="width:90%">
+      <tbody>
+        <tr>
+          <td id="final-color-preview" style="width:30%"></td>
+          <td id="final-color-text" style="width:30%">0</td>
+          <!-- <td style="width:30%"><input id="final-color-slider" type="range" min="0" max="255" value="0"></td> -->
+        </tr>
+        <tr>
+          <td id="red-preview" style="width:30%"></td>
+          <td id="red-text" style="width:30%">0</td>
+          <td style="width:30%"><input id="red-slider" type="range" min="0" max="255" value="0"></td>
+        </tr>
+        <tr>
+          <td id="green-preview" style="width:30%"></td>
+          <td id="green-text" style="width:30%">0</td>
+          <td style="width:30%"><input id="green-slider" type="range" min="0" max="255" value="0"></td>
+        </tr>
+        <tr>
+          <td id="blue-preview" style="width:30%"></td>
+          <td id="blue-text" style="width:30%">0</td>
+          <td style="width:30%"><input id="blue-slider" type="range" min="0" max="255" value="0"></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <script>
+        Initialize("canvas-view", ()=>{
+            if (MouseState.bPressed)
+            {
+              DrawRect(localStorage.penSize);
+            }
+        });
+
+        function dqsValue(selector)
+        {
+          return document.querySelector(selector).value;
+        }
+        
+        const penSizeSlider = document.querySelector("#pen-size-slider");
+        if (!localStorage.penSize)
+        {
+          localStorage.penSize = 50;
+        }
+        else
+        {
+          penSizeSlider.value = localStorage.penSize;
+          document.querySelector("#pen-size-text").textContent = `Pen Size: ${localStorage.penSize}`;
+        }
+        
+        penSizeSlider.oninput = function() {
+          localStorage.penSize = this.value;
+          document.querySelector("#pen-size-text").textContent = `Pen Size: ${localStorage.penSize}`;
+        }
+
+        function onColorChanged()
+        {
+          document.querySelector(`#final-color-preview`).style.backgroundColor = `rgb(${dqsValue('#red-slider')}, ${dqsValue('#green-slider')}, ${dqsValue('#blue-slider')})`;
+          Ctx.fillStyle = `rgb(${dqsValue('#red-slider')} ${dqsValue('#green-slider')} ${dqsValue('#blue-slider')})`;
+          document.querySelector(`#final-color-text`).textContent = Ctx.fillStyle;
+        }
+        
+        SetupColorSider("red", onColorChanged);
+        SetupColorSider("green", onColorChanged);
+        SetupColorSider("blue", onColorChanged);
+    </script>
+  </body>
+</html>
