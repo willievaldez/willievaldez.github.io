@@ -6,6 +6,7 @@ canvas {
   margin: auto;
   padding: 0;
   border: none;
+  touch-action: none;
   background-color: grey;
 }
 button {

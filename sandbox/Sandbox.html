@@ -50,6 +50,7 @@ full-width: true
         Initialize("canvas-view", ()=>{
             if (MouseState.bPressed)
             {
+              Ctx.fillStyle = `rgb(${dqsValue('#red-slider')} ${dqsValue('#green-slider')} ${dqsValue('#blue-slider')})`;
               DrawRect(localStorage.penSize);
             }
         });
@@ -78,7 +79,6 @@ full-width: true
         function onColorChanged()
         {
           document.querySelector(`#final-color-preview`).style.backgroundColor = `rgb(${dqsValue('#red-slider')}, ${dqsValue('#green-slider')}, ${dqsValue('#blue-slider')})`;
-          Ctx.fillStyle = `rgb(${dqsValue('#red-slider')} ${dqsValue('#green-slider')} ${dqsValue('#blue-slider')})`;
           document.querySelector(`#final-color-text`).textContent = Ctx.fillStyle;
         }
         

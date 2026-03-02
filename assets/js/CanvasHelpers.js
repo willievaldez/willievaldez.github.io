@@ -1,18 +1,20 @@
 let Canvas = null;
 let Ctx = null;
+let drawFun = null;
 let MouseState = 
 {
     pos: {x: 0, y: 0},
     bPressed: false
 }
 
-function Initialize(canvasId, drawFn)
+function Initialize(canvasId, inDrawFn)
 {
     Canvas = document.querySelector(`#${canvasId}`);
     Ctx = Canvas.getContext('2d');
 
     AddResizeListener();
     AddMouseListeners();
+    drawFn = inDrawFn;
 
     function drawWrapper() {
         drawFn();
@@ -47,12 +49,40 @@ function AddMouseListeners()
         };
     }, false);
     
+    Canvas.addEventListener('touchmove', function(evt) {
+        MouseState.bPressed = true;
+        var rect = Canvas.getBoundingClientRect();
+        let rectWidth = rect.right - rect.left;
+        let rectHeight = rect.bottom - rect.top; 
+        for (const changedTouch of evt.changedTouches) {
+            MouseState.pos = {
+                x: (changedTouch.pageX - rect.left) / rectWidth,
+                y: (changedTouch.pageY - rect.top) / rectHeight
+            };
+            drawFn();
+        }
+        MouseState.bPressed = false;
+    }, false);
+    
     Canvas.addEventListener('mousedown', function(evt) {
         MouseState.bPressed = true;
+    }, false);
+    Canvas.addEventListener('touchstart', function(evt) {
+        // MouseState.bPressed = true;
     }, false);
     
     Canvas.addEventListener('mouseup', function(evt) {
         MouseState.bPressed = false;
+    }, false);
+    Canvas.addEventListener('touchend', function(evt) {
+        // MouseState.bPressed = false;
+    }, false);
+    
+    Canvas.addEventListener('mouseleave', function(evt) {
+        MouseState.bPressed = false;
+    }, false);
+    Canvas.addEventListener('touchcancel', function(evt) {
+        // MouseState.bPressed = false;
     }, false);
 }
 
