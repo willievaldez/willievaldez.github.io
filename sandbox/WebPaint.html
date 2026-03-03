@@ -48,7 +48,7 @@ full-width: true
     </table>
 
     <script>
-        Initialize({canvasId: "canvas-view", drawFn: ()=>{
+        Initialize({canvasId: "canvas-view", height: 0.6, drawFn: ()=>{
             if (MouseState.bPressed)
             {
               Ctx.fillStyle = `rgb(${dqsValue('#red-slider')} ${dqsValue('#green-slider')} ${dqsValue('#blue-slider')})`;
