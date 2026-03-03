@@ -18,5 +18,5 @@ button {
 
 .flex { display : flex }
 input[type="range"] {
-  width:350px;
+  width:100%;
 }
