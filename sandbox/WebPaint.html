@@ -48,13 +48,13 @@ full-width: true
     </table>
 
     <script>
-        Initialize("canvas-view", ()=>{
+        Initialize({canvasId: "canvas-view", drawFn: ()=>{
             if (MouseState.bPressed)
             {
               Ctx.fillStyle = `rgb(${dqsValue('#red-slider')} ${dqsValue('#green-slider')} ${dqsValue('#blue-slider')})`;
               DrawRect(localStorage.penSize);
             }
-        });
+        }});
 
         function dqsValue(selector)
         {

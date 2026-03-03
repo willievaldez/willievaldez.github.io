@@ -1,0 +1,145 @@
+---
+layout: page
+share-title: Color Guess
+share-description: A simple color guessing app using basic HTML
+permalink: /ColorGuess
+full-width: true
+---
+
+<html>
+  <head>
+    <link rel="stylesheet" href="assets/css/base.css">
+  </head>
+  <body>
+    <script src="assets/js/CanvasHelpers.js"></script>
+    <script src="assets/js/PaintColors.js"></script>
+
+    <div id="instructions">
+      <p>You will be shown a series of colors. Try to match the color as closely as possible using the RGB sliders!</p>
+      <button id="begin">Begin!</button>
+    </div>
+    <div id="game" hidden>
+      <canvas id="canvas-view">
+        Your browser does not seem to support HTML canvas.
+      </canvas>
+      <table style="width:90%">
+        <tbody>
+          <tr>
+            <td id="final-color-preview" style="width:70%"></td>
+            <td style="width:20%"><button id="submit-guess">Submit</button></td>
+            <td id="final-color-text" style="width:10%">0</td>
+          </tr>
+        </tbody>
+      </table>
+      <br>
+      <table style="width:90%">
+        <tbody>
+          <tr>
+            <td id="red-preview" style="width:30%"></td>
+            <td id="red-text" style="width:30%">0</td>
+            <td style="width:30%"><input id="red-slider" type="range" min="0" max="255" value="0"></td>
+          </tr>
+          <tr>
+            <td id="green-preview" style="width:30%"></td>
+            <td id="green-text" style="width:30%">0</td>
+            <td style="width:30%"><input id="green-slider" type="range" min="0" max="255" value="0"></td>
+          </tr>
+          <tr>
+            <td id="blue-preview" style="width:30%"></td>
+            <td id="blue-text" style="width:30%">0</td>
+            <td style="width:30%"><input id="blue-slider" type="range" min="0" max="255" value="0"></td>
+          </tr>
+        </tbody>
+      </table>
+      <br>
+      <table style="width:90%">
+        <tbody>
+          <tr>
+            <td style="width:30%"><p>Health:</p></td>
+            <td id="health-text" style="width:30%">100</td>
+            <td style="width:30%"><input id="health-slider" type="range" min="0" max="300" value="300" disabled></td>
+          </tr>
+          <tr>
+            <td style="width:30%"><p>Level:</p></td>
+            <td id="level-text" style="width:30%"><p>0</p></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div id="results" hidden>
+      <h1>Game Over!</h1>
+      <h1 id="result-text"></h1>
+      <button id="restart">Restart</button>
+    </div>
+
+    <script>
+        Initialize({canvasId: "canvas-view", height: 0.2});
+
+        function dqsValue(selector)
+        {
+          return document.querySelector(selector).value;
+        }
+
+        function RandomInt(max)
+        {
+          return Math.round(Math.random() * max);
+        }
+
+        function StartGame(){
+          document.querySelector("#health-slider").value = 300;
+          document.querySelector(`#health-text`).textContent = 300;
+          document.querySelector("#level-text").textContent = 0;
+          NewColorGuess();
+        };
+
+        let valueToGuess = {r: 0, g: 0, b: 0};
+        function NewColorGuess(){
+          document.querySelector("#instructions").hidden = true;
+          document.querySelector("#game").hidden = false;
+            document.querySelector("#results").hidden = true;
+          
+          document.querySelector("#level-text").textContent++;
+          valueToGuess = {r: RandomInt(255), g: RandomInt(255), b: RandomInt(255)};
+          const colorHex = rgbToHex(valueToGuess.r, valueToGuess.g, valueToGuess.b);
+          Ctx.fillStyle = colorHex;
+          Ctx.fillRect(0, 0, Canvas.width, Canvas.height);
+        }
+
+        document.querySelector("#begin").onclick = StartGame;
+        document.querySelector("#restart").onclick = StartGame;
+        
+        document.querySelector("#submit-guess").onclick = function(){
+          const currentGuess = {r: dqsValue('#red-slider'), g: dqsValue('#green-slider'), b: dqsValue('#blue-slider')};
+          const newHealth = dqsValue("#health-slider") 
+                          - Math.abs(valueToGuess.r-currentGuess.r) 
+                          - Math.abs(valueToGuess.g-currentGuess.g) 
+                          - Math.abs(valueToGuess.b-currentGuess.b);
+          document.querySelector("#health-slider").value = newHealth;
+          document.querySelector(`#health-text`).textContent = newHealth;
+
+          if (newHealth < 0)
+          {
+            document.querySelector("#instructions").hidden = true;
+            document.querySelector("#game").hidden = true;
+            document.querySelector("#results").hidden = false;
+            document.querySelector(`#result-text`).textContent = `Score: ${document.querySelector("#level-text").textContent}`;
+          } 
+          else
+          {
+            NewColorGuess();
+          }
+        }
+
+        function onColorChanged()
+        {
+          const colorHex = rgbToHex(dqsValue('#red-slider'), dqsValue('#green-slider'), dqsValue('#blue-slider'));
+          document.querySelector(`#final-color-preview`).style.backgroundColor = colorHex;
+          document.querySelector(`#final-color-text`).textContent = colorHex;
+        }
+        
+        SetupColorSider("red", onColorChanged);
+        SetupColorSider("green", onColorChanged);
+        SetupColorSider("blue", onColorChanged);
+    </script>
+  </body>
+</html>

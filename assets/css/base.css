@@ -17,3 +17,6 @@ button {
 }
 
 .flex { display : flex }
+input[type="range"] {
+  width:500px;
+}

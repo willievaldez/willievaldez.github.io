@@ -7,30 +7,35 @@ let MouseState =
     bPressed: false
 }
 
-function Initialize(canvasId, inDrawFn)
+function Initialize(inParams)
 {
-    Canvas = document.querySelector(`#${canvasId}`);
+    const defaultParams = {canvasId: null, drawFn:null, width: 0.8, height: 0.8};
+    const params = Object.assign(defaultParams, inParams)
+    Canvas = document.querySelector(`#${params.canvasId}`);
     Ctx = Canvas.getContext('2d');
 
-    AddResizeListener();
+    AddResizeListener(params.width, params.height);
     AddMouseListeners();
-    drawFn = inDrawFn;
+    drawFn = params.drawFn;
 
     function drawWrapper() {
-        drawFn();
+        if (drawFn)
+        {
+            drawFn();
+        }
         window.requestAnimationFrame(drawWrapper);
     }
     window.requestAnimationFrame(drawWrapper);
 }
 
-function AddResizeListener()
+function AddResizeListener(width, height)
 {
     function resizeCanvas()
     {
         var W = Canvas.width, H = Canvas.height;
         let temp = Ctx.getImageData(0,0,W,H)
-        Canvas.width = window.innerWidth * 0.8;
-        Canvas.height = window.innerHeight * 0.8;
+        Canvas.width = window.innerWidth * width;
+        Canvas.height = window.innerHeight * height;
         Ctx.putImageData(temp,0,0);
     }
     window.addEventListener('resize', resizeCanvas);
@@ -59,7 +64,11 @@ function AddMouseListeners()
                 x: (changedTouch.pageX - rect.left - window.scrollX) / rectWidth,
                 y: (changedTouch.pageY - rect.top - window.scrollY) / rectHeight
             };
-            drawFn();
+
+            if (drawFn)
+            {
+                drawFn();
+            }
         }
         MouseState.bPressed = false;
     }, false);

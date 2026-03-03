@@ -17,6 +17,15 @@ function GetColorFor(colorName, value)
     return color;
 }
 
+// Source - https://stackoverflow.com/a/5624139
+// Posted by Tim Down, modified by community. See post 'Timeline' for change history
+// Retrieved 2026-03-03, License - CC BY-SA 4.0
+
+function rgbToHex(r, g, b) {
+    const hex = "#" + (1 << 24 | r << 16 | g << 8 | b).toString(16).slice(1);
+    return hex.toUpperCase();
+}
+
 function SetupColorSider(colorName, callback)
 {
     const Slider = document.querySelector(`#${colorName}-slider`);
