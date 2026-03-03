@@ -16,13 +16,6 @@ full-width: true
     <canvas id="canvas-view">
       Your browser does not seem to support HTML canvas.
     </canvas>
-    <div class="flex">
-      <p id="pen-size-text">
-        Pen Size: 50
-      </p>
-      <input id="pen-size-slider" type="range" min="1" max="100" value="50">
-    </div>
-    
     <table style="width:90%">
       <tbody>
         <tr>
@@ -52,12 +45,48 @@ full-width: true
       </tbody>
     </table>
 
+    <div class="flex">
+      <p id="pen-size-text">
+        Pen Size: 50
+      </p>
+      <input id="pen-size-slider" type="range" min="1" max="100" value="50">
+    </div>
+    <div class="flex">
+      <p>
+        Use Grid
+      </p>
+      <input id="use-grid" type="checkbox">
+    </div>
+    <!-- <div class="flex" id="width">
+      <p>
+        Canvas Width: 
+      </p>
+      <input id="width-text" type="text">
+      <select id="width-type">
+        <option value="%">%</option>
+        <option value="px">px</option>
+        <option value="cells">cells</option>
+      </select>
+    </div>
+    <div class="flex" id="height">
+      <p>
+        Canvas Height: 
+      </p>
+      <input id="height-text" type="text">
+      <select id="height-type">
+        <option value="%">%</option>
+        <option value="px">px</option>
+        <option value="cells">cells</option>
+      </select>
+    </div> -->
+    
     <script>
         Initialize({canvasId: "canvas-view", height: 0.6, drawFn: ()=>{
             if (MouseState.bPressed)
             {
-              Ctx.fillStyle = `rgb(${dqsValue('#red-slider')} ${dqsValue('#green-slider')} ${dqsValue('#blue-slider')})`;
-              DrawRect(localStorage.penSize);
+              DrawRect({size: localStorage.penSize,
+                   fillStyle: rgbToHex(dqsValue('#red-slider'), dqsValue('#green-slider'), dqsValue('#blue-slider')),
+                    bUseGrid: document.querySelector("#use-grid").checked});
             }
         }});
 
@@ -76,6 +105,11 @@ full-width: true
           penSizeSlider.value = localStorage.penSize;
           document.querySelector("#pen-size-text").textContent = `Pen Size: ${localStorage.penSize}`;
         }
+
+        document.querySelector("#use-grid").checked = localStorage.bUseGrid == "1";
+        document.querySelector("#use-grid").oninput = function(){
+          localStorage.bUseGrid = this.checked ? "1" : "0";
+        }
         
         penSizeSlider.oninput = function() {
           localStorage.penSize = this.value;
@@ -84,9 +118,9 @@ full-width: true
 
         function onColorChanged()
         {
-          Ctx.fillStyle = `rgb(${dqsValue('#red-slider')} ${dqsValue('#green-slider')} ${dqsValue('#blue-slider')})`;
-          document.querySelector(`#final-color-preview`).style.backgroundColor = `rgb(${dqsValue('#red-slider')}, ${dqsValue('#green-slider')}, ${dqsValue('#blue-slider')})`;
-          document.querySelector(`#final-color-text`).textContent = Ctx.fillStyle;
+          const colorValue = rgbToHex(dqsValue('#red-slider'), dqsValue('#green-slider'), dqsValue('#blue-slider'));
+          document.querySelector(`#final-color-preview`).style.backgroundColor = colorValue;
+          document.querySelector(`#final-color-text`).textContent = colorValue;
         }
         
         SetupColorSider("red", onColorChanged);

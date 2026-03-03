@@ -1,7 +1,20 @@
 let Canvas = null;
 let Ctx = null;
-let drawFun = null;
-let MouseState = 
+
+const InitParams = {
+    canvasId: null,
+    drawFn: null,
+    width: 0.8,
+    widthType: "%",
+    widthId: null,
+    height: 0.8,
+    heightType: "%",
+    heightId: null,
+    cellSize: 50,
+    cellId: null
+};
+
+const MouseState = 
 {
     pos: {x: 0, y: 0},
     bPressed: false
@@ -9,37 +22,53 @@ let MouseState =
 
 function Initialize(inParams)
 {
-    const defaultParams = {canvasId: null, drawFn:null, width: 0.8, height: 0.8};
-    const params = Object.assign(defaultParams, inParams)
-    Canvas = document.querySelector(`#${params.canvasId}`);
+    Object.assign(InitParams, inParams);
+    Canvas = document.querySelector(`#${InitParams.canvasId}`);
     Ctx = Canvas.getContext('2d');
 
-    AddResizeListener(params.width, params.height);
+    AddResizeListener();
     AddMouseListeners();
-    drawFn = params.drawFn;
 
     function drawWrapper() {
-        if (drawFn)
+        if (InitParams.drawFn)
         {
-            drawFn();
+            InitParams.drawFn();
         }
         window.requestAnimationFrame(drawWrapper);
     }
     window.requestAnimationFrame(drawWrapper);
 }
 
-function AddResizeListener(width, height)
+function ResizeCanvas()
 {
-    function resizeCanvas()
+    var W = Canvas.width, H = Canvas.height;
+    let temp = Ctx.getImageData(0,0,W,H);
+
+    if (InitParams.widthType == "%")
     {
-        var W = Canvas.width, H = Canvas.height;
-        let temp = Ctx.getImageData(0,0,W,H)
-        Canvas.width = window.innerWidth * width;
-        Canvas.height = window.innerHeight * height;
-        Ctx.putImageData(temp,0,0);
+        Canvas.width = window.innerWidth * InitParams.width;
     }
-    window.addEventListener('resize', resizeCanvas);
-    resizeCanvas();
+    else if (InitParams.widthType == "px")
+    {
+        Canvas.width = InitParams.width;
+    }
+
+    if (InitParams.heightType == "%")
+    {
+        Canvas.height = window.innerHeight * InitParams.height;
+    }
+    else if (InitParams.heightType == "px")
+    {
+        Canvas.height = InitParams.height;
+    }
+
+    Ctx.putImageData(temp,0,0);
+}
+
+function AddResizeListener()
+{
+    window.addEventListener('resize', ResizeCanvas);
+    ResizeCanvas();
 }
 
 function AddMouseListeners()
@@ -65,9 +94,9 @@ function AddMouseListeners()
                 y: (changedTouch.pageY - rect.top - window.scrollY) / rectHeight
             };
 
-            if (drawFn)
+            if (InitParams.drawFn)
             {
-                drawFn();
+                InitParams.drawFn();
             }
         }
         MouseState.bPressed = false;
@@ -95,14 +124,28 @@ function AddMouseListeners()
     }, false);
 }
 
-function DrawRect(size, fillStyle = null)
+function DrawRect(inParams)
 {
-    if (fillStyle)
+    const defaultParams = {fillStyle: null, size: 24, bUseGrid: false};
+    const params = Object.assign(defaultParams, inParams);
+    if (params.fillStyle)
     {
-        Ctx.fillStyle = fillStyle;
+        Ctx.fillStyle = params.fillStyle;
     }
 
-    Ctx.fillRect(Math.round(MouseState.pos.x*Canvas.width)-(size/2),
-                 Math.round(MouseState.pos.y*Canvas.height)-(size/2),
-                 size, size);
+    let xPos = MouseState.pos.x*Canvas.width;
+    let yPos = MouseState.pos.y*Canvas.height;
+
+    if (params.bUseGrid)
+    {
+        xPos -= xPos % params.size;
+        yPos -= yPos % params.size;
+    }
+    else
+    {
+        xPos -= params.size/2;
+        yPos -= params.size/2;
+    }
+
+    Ctx.fillRect(Math.round(xPos), Math.round(yPos), params.size, params.size);
 }

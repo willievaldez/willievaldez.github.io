@@ -74,6 +74,7 @@ full-width: true
     <div id="results" hidden>
       <h1>Game Over!</h1>
       <h1 id="result-text"></h1>
+      <h1 id="best-guess-text"></h1>
       <button id="restart">Restart</button>
     </div>
 
@@ -90,14 +91,16 @@ full-width: true
           return Math.round(Math.random() * max);
         }
 
+        let valueToGuess = {r: 0, g: 0, b: 0};
+        let bestGuess = 0;
         function StartGame(){
           document.querySelector("#health-slider").value = 300;
           document.querySelector(`#health-text`).textContent = 300;
           document.querySelector("#level-text").textContent = 0;
+          bestGuess = 255*3;
           NewColorGuess();
         };
 
-        let valueToGuess = {r: 0, g: 0, b: 0};
         function NewColorGuess(){
           document.querySelector("#instructions").hidden = true;
           document.querySelector("#game").hidden = false;
@@ -115,10 +118,14 @@ full-width: true
         
         document.querySelector("#submit-guess").onclick = function(){
           const currentGuess = {r: dqsValue('#red-slider'), g: dqsValue('#green-slider'), b: dqsValue('#blue-slider')};
-          const newHealth = dqsValue("#health-slider") 
-                          - Math.abs(valueToGuess.r-currentGuess.r) 
-                          - Math.abs(valueToGuess.g-currentGuess.g) 
-                          - Math.abs(valueToGuess.b-currentGuess.b);
+          const diff = Math.abs(valueToGuess.r-currentGuess.r) 
+                          + Math.abs(valueToGuess.g-currentGuess.g) 
+                          + Math.abs(valueToGuess.b-currentGuess.b);
+          if (diff < bestGuess)
+          {
+            bestGuess = diff;
+          }
+          const newHealth = dqsValue("#health-slider") - diff;
           document.querySelector("#health-slider").value = newHealth;
           document.querySelector(`#health-text`).textContent = newHealth;
 
@@ -128,6 +135,7 @@ full-width: true
             document.querySelector("#game").hidden = true;
             document.querySelector("#results").hidden = false;
             document.querySelector(`#result-text`).textContent = `Score: ${document.querySelector("#level-text").textContent}`;
+            document.querySelector(`#best-guess-text`).textContent = `Best Guess: ${bestGuess}`;
           } 
           else
           {
