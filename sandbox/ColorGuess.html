@@ -15,7 +15,7 @@ full-width: true
     <script src="assets/js/PaintColors.js"></script>
 
     <div id="instructions">
-      <p>You will be shown a series of colors. Try to match the color as closely as possible using the RGB sliders!</p>
+      <p>You will be shown a series of colors. Race the clock as you try to match the color as closely as possible using the RGB sliders!</p>
       <button id="begin">Begin!</button>
     </div>
     <div id="game" hidden>
@@ -81,6 +81,16 @@ full-width: true
     <script>
         Initialize({canvasId: "canvas-view", height: 0.2});
 
+        let bGameRunning = false;
+        setInterval(()=>{
+          if (bGameRunning)
+          {
+            const newHealth = dqsValue("#health-slider") - 1;
+            document.querySelector("#health-slider").value = newHealth;
+            document.querySelector(`#health-text`).textContent = newHealth;
+          }
+        }, 1000);
+
         function dqsValue(selector)
         {
           return document.querySelector(selector).value;
@@ -94,6 +104,7 @@ full-width: true
         let valueToGuess = {r: 0, g: 0, b: 0};
         let bestGuess = 0;
         function StartGame(){
+          bGameRunning = true;
           document.querySelector("#health-slider").value = 300;
           document.querySelector(`#health-text`).textContent = 300;
           document.querySelector("#level-text").textContent = 0;
@@ -131,6 +142,7 @@ full-width: true
 
           if (newHealth < 0)
           {
+            bGameRunning = false;
             document.querySelector("#instructions").hidden = true;
             document.querySelector("#game").hidden = true;
             document.querySelector("#results").hidden = false;
