@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Next Lexographical Permutation
-tags: [C++, Hackerrank]
+tags: [C++, hackerrank]
 ---
 
 I've been trying my hand at a few hackerrank problems, and ran into one that didn't discuss a solution I was satisfied with.
