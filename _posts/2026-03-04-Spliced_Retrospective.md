@@ -43,7 +43,7 @@ disk usage footprint small for our mobile users.
 The Experience Definition would define all of the necessary game feature plugins, as well as "variations"
 of gameplay (for example, each available map in a "team deathmatch" game mode acts as a "variation").
 During packaging, we would bake a subset of Experience Definition data into a registry, which acted as an almanac of all of the
-gameplay experiences available to a player, without needing to necessarly load or download the Experience Definition.
+gameplay experiences available to a player, without needing to necessarily load or download the Experience Definition.
 
 On top of all of this, we chunked our gameplay into "game contexts"; which, when activated, grant a player a set of
 Gameplay Abilities, UI, and input configurations. This allowed designers to create and reuse these contexts anywhere
@@ -100,8 +100,9 @@ The architecture that we built enabled insanely fast iteration. Anybody could cr
 play with friends in our packaged build within a single day. The engineering department would periodically host
 internal game jams where we could make new experiences from scratch in the course of a week. The things we were able
 to build in those weeks always blew me away. Times like those made me realize that we truly built something special.
+In writing this down, I'm hoping that this architecture lives on in one form or another after Spliced.
 
 It's a shame to see this journey coming to an end before we could ship our game, but I am so proud of the work
 we've done, and made connections with some absolutely world class engineers that I hope to work with in the future.
-We were given the task of making an architecture that could host *anything*, and I honestly believe we nailed it.
+We were given the task of making an architecture that could be *anything*, and I honestly believe we nailed it.
 Thanks to everyone that I worked with at Spliced, it has truly been an honor working with you these past 4 years.
