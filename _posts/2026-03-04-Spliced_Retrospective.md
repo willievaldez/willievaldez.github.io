@@ -58,7 +58,7 @@ but once implemented, really unlocked our workflow.
 ## Hosts and Replication Modes
 We had such a wide variety of gameplay, that we couldn't simply host all of our content on dedicated servers.
 Every experience definition would define its "Host type", aka it's net mode: Standalone, Listen Server, or Dedicated.
-Sandalone game modes would facilitate single player experiences such as the main menu, or the post game results screen.
+Standalone game modes would facilitate single player experiences such as the main menu, or the post game results screen.
 Listen Server would facilitate social player-hosted experiences, such as our player housing mode. This was supported
 by EOS sessions in the back-end, which allowed for cross-platform play without having to fiddle with things like
 relay servers and IP anonymization. We used device id login in order to remove the need to create an EOS account at login.
