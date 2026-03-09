@@ -10,6 +10,8 @@ const InitParams = {
     height: 0.8,
     heightType: "%",
     heightId: null,
+    widthRatio: 0,
+    heightRatio: 0,
     cellSize: 50,
     cellId: null
 };
@@ -41,8 +43,8 @@ function Initialize(inParams)
 
 function ResizeCanvas()
 {
-    var W = Canvas.width, H = Canvas.height;
-    let temp = Ctx.getImageData(0,0,W,H);
+    const tempImg = new Image();
+    tempImg.src = Canvas.toDataURL();
 
     if (InitParams.widthType == "%")
     {
@@ -62,7 +64,23 @@ function ResizeCanvas()
         Canvas.height = InitParams.height;
     }
 
-    Ctx.putImageData(temp,0,0);
+    if (InitParams.heightRatio && InitParams.widthRatio)
+    {
+        const calculatedWidth = Canvas.height * InitParams.widthRatio / InitParams.heightRatio;
+        const calculatedHeight = Canvas.width * InitParams.heightRatio / InitParams.widthRatio;
+        if (Canvas.width > calculatedWidth)
+        {
+            Canvas.width = calculatedWidth;
+        }
+        else if (Canvas.height > calculatedHeight)
+        {
+            Canvas.height = calculatedHeight;
+        }
+    }
+
+    tempImg.onload = ()=>{
+        DrawImage({src: tempImg, x: 0, y: 0, canvasWidthRatio: 1.0, canvasHeightRatio: 1.0});
+    };
 }
 
 function AddResizeListener()
@@ -148,4 +166,15 @@ function DrawRect(inParams)
     }
 
     Ctx.fillRect(Math.round(xPos), Math.round(yPos), params.size, params.size);
+}
+
+function DrawImage(inParams)
+{
+    const defaultParams = {src: null, x: 0, y: 0, canvasWidthRatio: null, canvasHeightRatio: null};
+    const params = Object.assign(defaultParams, inParams);
+
+    let dWidth = Canvas.width * params.canvasWidthRatio;
+    let dHeight = Canvas.height * params.canvasHeightRatio;
+
+    Ctx.drawImage(params.src, params.x, params.y, dWidth, dHeight);
 }
