@@ -4,6 +4,7 @@ let Ctx = null;
 const InitParams = {
     canvasId: null,
     drawFn: null,
+    onResize: null,
     width: 0.8,
     widthType: "%",
     widthId: null,
@@ -39,6 +40,30 @@ function Initialize(inParams)
         window.requestAnimationFrame(drawWrapper);
     }
     window.requestAnimationFrame(drawWrapper);
+}
+
+function Resize(inParams)
+{
+    if (inParams.widthType == "%" && inParams.width > 1.0)
+    {
+        return;
+    }
+    else if (inParams.widthType == "px" && inParams.width <= 1)
+    {
+        return;
+    }
+
+    if (inParams.heightType == "%" && inParams.height > 1.0)
+    {
+        return;
+    }
+    else if (inParams.heightType == "px" && inParams.height <= 1)
+    {
+        return;
+    }
+
+    Object.assign(InitParams, inParams);
+    ResizeCanvas();
 }
 
 function ResizeCanvas()
@@ -78,9 +103,16 @@ function ResizeCanvas()
         }
     }
 
-    tempImg.onload = ()=>{
-        DrawImage({src: tempImg, x: 0, y: 0, canvasWidthRatio: 1.0, canvasHeightRatio: 1.0});
-    };
+    if (InitParams.onResize)
+    {
+        InitParams.onResize();
+    }
+    else
+    {
+        tempImg.onload = ()=>{
+            DrawImage({src: tempImg, x: 0, y: 0, canvasWidthRatio: 1.0, canvasHeightRatio: 1.0});
+        };
+    }
 }
 
 function AddResizeListener()
@@ -173,8 +205,24 @@ function DrawImage(inParams)
     const defaultParams = {src: null, x: 0, y: 0, canvasWidthRatio: null, canvasHeightRatio: null};
     const params = Object.assign(defaultParams, inParams);
 
-    let dWidth = Canvas.width * params.canvasWidthRatio;
-    let dHeight = Canvas.height * params.canvasHeightRatio;
+    let dWidth = params.src.naturalWidth;
+    let dHeight = params.src.naturalHeight;
+    if (params.canvasWidthRatio)
+    {
+        dWidth = Canvas.width * params.canvasWidthRatio;
+        if (!params.canvasHeightRatio)
+        {
+            dHeight *= (dWidth / params.src.naturalWidth);
+        }
+    }
+    if (params.canvasHeightRatio)
+    {
+        dHeight = Canvas.height * params.canvasHeightRatio;
+        if (!params.canvasWidthRatio)
+        {
+            dWidth *= (dHeight / params.src.naturalHeight);
+        }
+    }
 
-    Ctx.drawImage(params.src, params.x, params.y, dWidth, dHeight);
+    Ctx.drawImage(params.src, params.x * Canvas.width, params.y * Canvas.height, dWidth, dHeight);
 }

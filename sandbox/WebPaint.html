@@ -57,7 +57,7 @@ full-width: true
       </p>
       <input id="use-grid" type="checkbox">
     </div>
-    <!-- <div class="flex" id="width">
+    <div class="flex" id="width">
       <p>
         Canvas Width: 
       </p>
@@ -65,7 +65,6 @@ full-width: true
       <select id="width-type">
         <option value="%">%</option>
         <option value="px">px</option>
-        <option value="cells">cells</option>
       </select>
     </div>
     <div class="flex" id="height">
@@ -76,12 +75,67 @@ full-width: true
       <select id="height-type">
         <option value="%">%</option>
         <option value="px">px</option>
-        <option value="cells">cells</option>
       </select>
-    </div> -->
+    </div>
+    <button id="export">Export</button>
     
     <script>
-        Initialize({canvasId: "canvas-view", height: 0.6, drawFn: ()=>{
+        function dqsValue(selector)
+        {
+          return document.querySelector(selector).value;
+        }
+        
+        // Canvas Size
+        function SetupCanvasSizeElements(dim)
+        {
+          const text = document.querySelector(`#${dim}-text`);
+          if (!localStorage[dim])
+          {
+            localStorage[dim] = 0.6;
+          }
+          text.value = localStorage[dim];
+
+          const select = document.querySelector(`#${dim}-type`);
+          if (!localStorage[`${dim}Type`])
+          {
+            localStorage[`${dim}Type`] = "%";
+          }
+          select.value = localStorage[`${dim}Type`];
+        }
+        SetupCanvasSizeElements("width");
+        SetupCanvasSizeElements("height");
+
+        function onCanvasSizeChanged()
+        {
+          const params = {
+            width: dqsValue("#width-text"),
+            widthType: dqsValue("#width-type"),
+            height: dqsValue("#height-text"),
+            heightType: dqsValue("#height-type")
+          }
+
+          if (params.width && params.widthType && params.height && params.heightType)
+          {
+            localStorage.width = params.width;
+            localStorage.widthType = params.widthType;
+            localStorage.height = params.height;
+            localStorage.heightType = params.heightType;
+            Resize(params);
+          }
+        }
+        
+        document.querySelector("#width-text").oninput = onCanvasSizeChanged;
+        document.querySelector("#width-type").oninput = onCanvasSizeChanged;
+        document.querySelector("#height-text").oninput = onCanvasSizeChanged;
+        document.querySelector("#height-type").oninput = onCanvasSizeChanged;
+
+        // Initialize canvas
+        Initialize({canvasId: "canvas-view", 
+            width: dqsValue("#width-text"),
+            widthType: dqsValue("#width-type"),
+            height: dqsValue("#height-text"),
+            heightType: dqsValue("#height-type"),
+            drawFn: ()=>{
             if (MouseState.bPressed)
             {
               DrawRect({size: localStorage.penSize,
@@ -90,11 +144,7 @@ full-width: true
             }
         }});
 
-        function dqsValue(selector)
-        {
-          return document.querySelector(selector).value;
-        }
-        
+        // Pen Size
         const penSizeSlider = document.querySelector("#pen-size-slider");
         if (!localStorage.penSize)
         {
@@ -106,16 +156,18 @@ full-width: true
           document.querySelector("#pen-size-text").textContent = `Pen Size: ${localStorage.penSize}`;
         }
 
-        document.querySelector("#use-grid").checked = localStorage.bUseGrid == "1";
-        document.querySelector("#use-grid").oninput = function(){
-          localStorage.bUseGrid = this.checked ? "1" : "0";
-        }
-        
         penSizeSlider.oninput = function() {
           localStorage.penSize = this.value;
           document.querySelector("#pen-size-text").textContent = `Pen Size: ${localStorage.penSize}`;
         }
 
+        // Use Grid
+        document.querySelector("#use-grid").checked = localStorage.bUseGrid == "1";
+        document.querySelector("#use-grid").oninput = function(){
+          localStorage.bUseGrid = this.checked ? "1" : "0";
+        }
+        
+        // Color Sliders
         function onColorChanged()
         {
           const colorValue = rgbToHex(dqsValue('#red-slider'), dqsValue('#green-slider'), dqsValue('#blue-slider'));
@@ -126,6 +178,13 @@ full-width: true
         SetupColorSider("red", onColorChanged);
         SetupColorSider("green", onColorChanged);
         SetupColorSider("blue", onColorChanged);
+
+        // Export
+        document.querySelector("#export").onclick = function()
+        {
+          Canvas.toBlob((blob) => window.open(URL.createObjectURL(blob), '_blank'));
+        }
+
     </script>
   </body>
 </html>
