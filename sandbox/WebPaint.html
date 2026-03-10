@@ -61,7 +61,7 @@ full-width: true
       <p id="pen-size-text">
         Pen Size: 50
       </p>
-      <input id="pen-size-slider" type="range" min="1" max="100" value="50">
+      <input id="pen-size-slider" type="range" min="1" max="100" value="20">
     </div>
     <div class="flex">
       <p>
@@ -161,7 +161,7 @@ full-width: true
         const penSizeSlider = document.querySelector("#pen-size-slider");
         if (!localStorage.penSize)
         {
-          localStorage.penSize = 50;
+          localStorage.penSize = 20;
         }
         else
         {
