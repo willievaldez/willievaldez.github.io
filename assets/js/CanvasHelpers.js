@@ -14,7 +14,8 @@ const InitParams = {
     widthRatio: 0,
     heightRatio: 0,
     cellSize: 50,
-    cellId: null
+    cellId: null,
+    withStateCache: false
 };
 
 const MouseState = 
@@ -27,10 +28,15 @@ function Initialize(inParams)
 {
     Object.assign(InitParams, inParams);
     Canvas = document.querySelector(`#${InitParams.canvasId}`);
-    Ctx = Canvas.getContext('2d');
+    Ctx = Canvas.getContext('2d', {willReadFrequently: InitParams.withStateCache});
 
     AddResizeListener();
     AddMouseListeners();
+
+    if (InitParams.withStateCache)
+    {
+        SetupUndo();
+    }
 
     function drawWrapper() {
         if (InitParams.drawFn)
@@ -160,18 +166,80 @@ function AddMouseListeners()
     }, false);
     
     Canvas.addEventListener('mouseup', function(evt) {
+        if (MouseState.bPressed)
+        {
+            CacheState();
+        }
         MouseState.bPressed = false;
     }, false);
     Canvas.addEventListener('touchend', function(evt) {
+        if (MouseState.bPressed)
+        {
+            CacheState();
+        }
         // MouseState.bPressed = false;
     }, false);
     
     Canvas.addEventListener('mouseleave', function(evt) {
+        if (MouseState.bPressed)
+        {
+            CacheState();
+        }
         MouseState.bPressed = false;
     }, false);
     Canvas.addEventListener('touchcancel', function(evt) {
+        if (MouseState.bPressed)
+        {
+            CacheState();
+        }
         // MouseState.bPressed = false;
     }, false);
+}
+
+const StateCache = [];
+StateCache.length = 20;
+let CurrState = -1;
+function CacheState()
+{
+    if (!InitParams.withStateCache)
+    {
+        return;
+    }
+
+    if (++CurrState >= StateCache.length)
+    {
+        CurrState = 0;
+    }
+    StateCache[CurrState] = Ctx.getImageData(0,0,Canvas.width, H = Canvas.height);
+}
+
+function Undo()
+{
+    StateCache[CurrState] = null;
+    if (--CurrState < 0)
+    {
+        CurrState = StateCache.length-1;
+    }
+
+    if (StateCache[CurrState])
+    {
+        Ctx.putImageData(StateCache[CurrState],0,0);
+    }
+    else
+    {
+        CacheState();
+    }
+}
+
+function SetupUndo()
+{
+    CacheState();
+    document.addEventListener('keydown', (event) => {
+        if (event.ctrlKey && event.key === 'z') {
+            event.preventDefault();
+            Undo();
+        }
+    });
 }
 
 function DrawRect(inParams)
