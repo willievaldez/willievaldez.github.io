@@ -244,35 +244,34 @@ function SetupUndo()
 
 function DrawRect(inParams)
 {
-    const defaultParams = {fillStyle: null, size: 24, bUseGrid: false};
+    const defaultParams = {fillStyle: null, size: 24, bUseGrid: false, xPos: null, yPos: null};
     const params = Object.assign(defaultParams, inParams);
     if (params.fillStyle)
     {
         Ctx.fillStyle = params.fillStyle;
     }
 
-    let xPos = MouseState.pos.x*Canvas.width;
-    let yPos = MouseState.pos.y*Canvas.height;
-
-    if (params.bUseGrid)
+    if (!params.xPos)
     {
-        xPos -= xPos % params.size;
-        yPos -= yPos % params.size;
+        params.xPos = MouseState.pos.x*Canvas.width;
+        params.xPos -= params.bUseGrid ? xPos % params.size : params.size/2;
     }
-    else
+    if (!params.yPos)
     {
-        xPos -= params.size/2;
-        yPos -= params.size/2;
+        params.yPos = MouseState.pos.y*Canvas.height;
+        params.yPos -= params.bUseGrid ? yPos % params.size : params.size/2;
     }
 
-    Ctx.fillRect(Math.round(xPos), Math.round(yPos), params.size, params.size);
+
+    Ctx.fillRect(Math.round(params.xPos), Math.round(params.yPos), params.size, params.size);
 }
 
 function DrawImage(inParams)
 {
-    const defaultParams = {src: null, x: 0, y: 0, canvasWidthRatio: null, canvasHeightRatio: null};
+    const defaultParams = {src: null, x: 0, y: 0, centered: true, canvasWidthRatio: null, canvasHeightRatio: null};
     const params = Object.assign(defaultParams, inParams);
 
+    // Account for inputted scale
     let dWidth = params.src.naturalWidth;
     let dHeight = params.src.naturalHeight;
     if (params.canvasWidthRatio)
@@ -292,5 +291,16 @@ function DrawImage(inParams)
         }
     }
 
-    Ctx.drawImage(params.src, params.x * Canvas.width, params.y * Canvas.height, dWidth, dHeight);
+    // Convert to screen space
+    params.x *= Canvas.width;
+    params.y *= Canvas.height;
+
+    // Center if necessary
+    if (params.centered)
+    {
+        params.x -= dWidth / 2.0;
+        params.y -= dHeight / 2.0;
+    }
+
+    Ctx.drawImage(params.src, Math.round(params.x), Math.round(params.y), dWidth, dHeight);
 }

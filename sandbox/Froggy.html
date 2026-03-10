@@ -1,0 +1,95 @@
+---
+layout: page
+share-title: Froggy
+share-description: Live your best frog life catching flies!
+permalink: /Froggy
+full-width: true
+---
+
+<html>
+  <head>
+    <link rel="stylesheet" href="/assets/css/base.css">
+  </head>
+  <body>
+    <script src="/assets/js/CanvasHelpers.js"></script>
+    <script src="/assets/js/PaintColors.js"></script>
+    <img id="background" src="/assets/img/background2.png" hidden>
+    <img id="title" src="/assets/img/title.png" hidden>
+    <img id="frog" src="/assets/img/frog.png" hidden>
+    <img id="fly" src="/assets/img/fly.png" hidden>
+    <img id="play" src="/assets/img/play.png" hidden>
+    <canvas id="canvas-view" style="cursor: none">
+      Your browser does not seem to support HTML canvas.
+    </canvas>
+    
+    <script>
+        Initialize({canvasId: "canvas-view", width: 0.9, height: 0.9, widthRatio: 4, heightRatio: 3, drawFn: Update });
+
+        const froggy = {
+          state: "idle",
+          start: {x: 0.225, y: 0.65},
+          dest: {x: 0.0, y: 0.0},
+          progress: 0.0,
+          speed: 0.01,
+          getPos: function() {
+            if (this.state != "moving")
+            {
+              return this.start;
+            }
+
+            return {x: this.start.x + ((this.dest.x - this.start.x) * this.progress), y: this.start.y + ((this.dest.y - this.start.y) * this.progress)}
+          },
+          update: function() {
+            if (this.state != "idle") {
+              this.progress += this.speed;
+            }
+            if (this.progress > 1.0)
+            {
+              this.progress = 0.0;
+              this.state = "idle";
+            }
+
+            DrawImage({src: document.getElementById("frog"), x: froggy.getPos().x, y: froggy.getPos().y, canvasWidthRatio: 0.1});
+          }
+        };
+
+        let currState = "Init";
+        function Update()
+        {
+          DrawBackground();
+          DrawUI();
+          DrawEntities();
+
+          // Cursor
+          DrawImage({src: document.getElementById("fly"), x: MouseState.pos.x, y: MouseState.pos.y, canvasWidthRatio: 0.05});
+
+        }
+
+        function DrawBackground()
+        {
+            DrawImage({src: document.getElementById("background"), x: 0.5, y: 0.5, canvasWidthRatio: 1.0, canvasHeightRatio: 1.0});
+        }
+
+        function DrawEntities()
+        {
+            froggy.update();
+        }
+
+        function DrawUI()
+        {
+            DrawImage({src: document.getElementById("title"), x: 0.5, y: 0.2});
+            DrawImage({src: document.getElementById("play"), x: 0.7, y: 0.6, canvasWidthRatio: 0.4});
+        }
+
+        // Inputs
+        const onClick = function(){
+          froggy.state = "moving";
+          froggy.dest = MouseState.pos;
+          froggy.progress = 0.0;
+        }
+        Canvas.addEventListener('mousedown', onClick, false);
+        Canvas.addEventListener('touchstart', onClick, false);
+
+    </script>
+  </body>
+</html>
