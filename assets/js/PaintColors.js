@@ -26,26 +26,106 @@ function rgbToHex(r, g, b) {
     return hex.toUpperCase();
 }
 
-function SetupColorSider(colorName, callback)
+function SetupPallete()
 {
-    const Slider = document.querySelector(`#${colorName}-slider`);
-    const SliderPreview = document.querySelector(`#${colorName}-preview`);
-    const SliderText = document.querySelector(`#${colorName}-text`);
-
-    if (!localStorage[colorName])
+    if (!localStorage.currentPallete)
     {
-        localStorage[colorName] = 50;
+        localStorage.currentPallete = 0;
     }
+    
+    for (let i = 0; i < 10; ++i)
+    {
+        const pallete = document.querySelector(`#pallete-${i}`);
+        const selected = i == localStorage.currentPallete;
+        pallete.className = selected ? "selected" : "";
+        for (let colorName of ["red", "green", "blue"])
+        {
+            const localStorageId = `pallete${i}-${colorName[0]}`;
+            if (!localStorage[localStorageId])
+            {
+                localStorage[localStorageId] = 100;
+            }
 
-    SliderPreview.style.backgroundColor = GetColorFor(colorName, localStorage[colorName]);
-    SliderText.textContent = `${localStorage[colorName]}`;
-    Slider.value = localStorage[colorName];
-    callback();
+            if (selected)
+            {
+                const Slider = document.querySelector(`#${colorName}-slider`);
+                const SliderPreview = document.querySelector(`#${colorName}-preview`);
+                const SliderText = document.querySelector(`#${colorName}-text`);
 
-    Slider.oninput = function() {
-        SliderPreview.style.backgroundColor = GetColorFor(colorName, this.value);
-        SliderText.textContent = `${this.value}`;
-        localStorage[colorName] = this.value;
-        callback();
+                SliderPreview.style.backgroundColor = GetColorFor(colorName, localStorage[localStorageId]);
+                SliderText.textContent = localStorage[localStorageId];
+                Slider.value = localStorage[localStorageId];
+            }
+        }
+
+        const colorValue = rgbToHex(localStorage[`pallete${i}-r`],localStorage[`pallete${i}-g`],localStorage[`pallete${i}-b`]);
+        pallete.style.backgroundColor = colorValue;
+        pallete.textContent = colorValue;
+        const sum = parseInt(localStorage[`pallete${i}-r`])+ parseInt(localStorage[`pallete${i}-g`])+ parseInt(localStorage[`pallete${i}-b`]);
+        pallete.style.color = sum > 382.5 ? "black" : "white";
+
+
+        pallete.onclick = function()
+        {
+            document.querySelector(`#pallete-${localStorage.currentPallete}`).className = "";
+            localStorage.currentPallete = i;
+            this.className = "selected";
+
+            for (let colorName of ["red", "green", "blue"])
+            {
+                const Slider = document.querySelector(`#${colorName}-slider`);
+                const SliderPreview = document.querySelector(`#${colorName}-preview`);
+                const SliderText = document.querySelector(`#${colorName}-text`);
+                const localStorageId = `pallete${localStorage.currentPallete}-${colorName[0]}`;
+
+                SliderPreview.style.backgroundColor = GetColorFor(colorName, localStorage[localStorageId]);
+                SliderText.textContent = localStorage[localStorageId];
+                Slider.value = localStorage[localStorageId];
+            }
+        }
+    }
+}
+
+function SetupColorSliders(callback = null, previewId = null)
+{
+    for (let colorName of ["red", "green", "blue"])
+    {
+        const Slider = document.querySelector(`#${colorName}-slider`);
+        const SliderPreview = document.querySelector(`#${colorName}-preview`);
+        const SliderText = document.querySelector(`#${colorName}-text`);
+        const localStorageId = `pallete${localStorage.currentPallete}-${colorName[0]}`;
+
+        if (!localStorage[localStorageId])
+        {
+            localStorage[localStorageId] = 100;
+        }
+
+        SliderPreview.style.backgroundColor = GetColorFor(colorName, localStorage[localStorageId]);
+        SliderText.textContent = localStorage[localStorageId];
+        Slider.value = localStorage[localStorageId];
+
+        function callbackWrapper() {
+            const pallete = document.querySelector(previewId ? previewId : `#pallete-${localStorage.currentPallete}`);
+            const colorValue = rgbToHex(dqsValue('#red-slider'), dqsValue('#green-slider'), dqsValue('#blue-slider'));
+            pallete.style.backgroundColor = colorValue;
+            pallete.textContent = colorValue;
+
+            const sum = parseInt(dqsValue('#red-slider'))+ parseInt(dqsValue('#green-slider'))+ parseInt(dqsValue('#blue-slider'));
+            pallete.style.color = sum > 382.5 ? "black" : "white";
+
+            if (callback)
+            {
+                callback();
+            }
+        }
+
+        callbackWrapper();
+
+        Slider.oninput = function() {
+            SliderPreview.style.backgroundColor = GetColorFor(colorName, this.value);
+            SliderText.textContent = this.value;
+            localStorage[`pallete${localStorage.currentPallete}-${colorName[0]}`] = this.value;
+            callbackWrapper();
+        }
     }
 }

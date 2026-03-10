@@ -19,13 +19,25 @@ full-width: true
     <table style="width:90%">
       <tbody>
         <tr>
+          <th style="width:10%" id="pallete-0"></th>
+          <th style="width:10%" id="pallete-1"></th>
+          <th style="width:10%" id="pallete-2"></th>
+          <th style="width:10%" id="pallete-3"></th>
+          <th style="width:10%" id="pallete-4"></th>
+          <th style="width:10%" id="pallete-5"></th>
+          <th style="width:10%" id="pallete-6"></th>
+          <th style="width:10%" id="pallete-7"></th>
+          <th style="width:10%" id="pallete-8"></th>
+          <th style="width:10%" id="pallete-9"></th>
+        </tr>
+      </tbody>
+    </table>
+    <table style="width:90%">
+      <tbody>
+        <tr>
           <th style="width:10%"></th>
           <th style="width:10%"></th>
           <th style="width:80%"></th>
-        </tr>
-        <tr>
-          <td id="final-color-preview"></td>
-          <td id="final-color-text">0</td>
         </tr>
         <tr>
           <td id="red-preview"></td>
@@ -168,17 +180,9 @@ full-width: true
           localStorage.bUseGrid = this.checked ? "1" : "0";
         }
         
-        // Color Sliders
-        function onColorChanged()
-        {
-          const colorValue = rgbToHex(dqsValue('#red-slider'), dqsValue('#green-slider'), dqsValue('#blue-slider'));
-          document.querySelector(`#final-color-preview`).style.backgroundColor = colorValue;
-          document.querySelector(`#final-color-text`).textContent = colorValue;
-        }
-        
-        SetupColorSider("red", onColorChanged);
-        SetupColorSider("green", onColorChanged);
-        SetupColorSider("blue", onColorChanged);
+        // Color Sliders and Palletes
+        SetupPallete();
+        SetupColorSliders();
 
         // Export
         document.querySelector("#export").onclick = function()

@@ -25,9 +25,8 @@ full-width: true
       <table style="width:90%">
         <tbody>
           <tr>
-            <td id="final-color-preview" style="width:70%"></td>
+            <td id="final-color" style="width:70%"></td>
             <td style="width:20%"><button id="submit-guess">Submit</button></td>
-            <td id="final-color-text" style="width:10%">0</td>
           </tr>
         </tbody>
       </table>
@@ -154,17 +153,8 @@ full-width: true
             NewColorGuess();
           }
         }
-
-        function onColorChanged()
-        {
-          const colorHex = rgbToHex(dqsValue('#red-slider'), dqsValue('#green-slider'), dqsValue('#blue-slider'));
-          document.querySelector(`#final-color-preview`).style.backgroundColor = colorHex;
-          document.querySelector(`#final-color-text`).textContent = colorHex;
-        }
         
-        SetupColorSider("red", onColorChanged);
-        SetupColorSider("green", onColorChanged);
-        SetupColorSider("blue", onColorChanged);
+        SetupColorSliders(null, "#final-color");
     </script>
   </body>
 </html>

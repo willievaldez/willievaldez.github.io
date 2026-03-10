@@ -15,6 +15,13 @@ button {
   margin: auto;
   padding: 0.6em;
 }
+th {
+    font-weight: normal;
+}
+th.selected {
+  border-style: solid;
+  border-color: #aa0000;
+}
 
 .flex { display : flex }
 input[type="range"] {
