@@ -254,12 +254,12 @@ function DrawRect(inParams)
     if (!params.xPos)
     {
         params.xPos = MouseState.pos.x*Canvas.width;
-        params.xPos -= params.bUseGrid ? xPos % params.size : params.size/2;
+        params.xPos -= params.bUseGrid ? params.xPos % params.size : params.size/2;
     }
     if (!params.yPos)
     {
         params.yPos = MouseState.pos.y*Canvas.height;
-        params.yPos -= params.bUseGrid ? yPos % params.size : params.size/2;
+        params.yPos -= params.bUseGrid ? params.yPos % params.size : params.size/2;
     }
 
 
