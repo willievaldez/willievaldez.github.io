@@ -16,13 +16,15 @@ const InitParams = {
     cellSize: 50,
     cellId: null,
     withStateCache: false,
-    customCursor: null
+    customCursor: null,
+    onClick: null
 };
 
 const MouseState = 
 {
     pos: {x: 0, y: 0},
-    bPressed: false
+    bPressed: false,
+    bTouch: false
 }
 
 const CanvasButtons = {};
@@ -55,22 +57,13 @@ function Initialize(inParams)
                 if (mousePos.x > x && mousePos.x - x < dWidth && mousePos.y > y && mousePos.y - y < dHeight)
                 {
                     Ctx.filter = "contrast(1.4)";
-
-                    if (MouseState.bPressed && CanvasButtons[buttonName].onclick)
-                    {
-                        CanvasButtons[buttonName].onclick();
-                        if (!CanvasButtons[buttonName])
-                        {
-                            continue;
-                        }
-                    }
                 }
                 
                 DrawImage(CanvasButtons[buttonName]);
                 Ctx.filter = "";
             }
 
-            if (InitParams.customCursor)
+            if (InitParams.customCursor && !MouseState.bTouch)
             {
                 InitParams.customCursor.x = MouseState.pos.x;
                 InitParams.customCursor.y = MouseState.pos.y;
@@ -171,6 +164,7 @@ function AddMouseListeners()
             x: (evt.clientX - rect.left) / rectWidth,
             y: (evt.clientY - rect.top) / rectHeight
         };
+        MouseState.bTouch = false;
     }, false);
     
     Canvas.addEventListener('touchmove', function(evt) {
@@ -185,12 +179,16 @@ function AddMouseListeners()
             break;
         }
         MouseState.bPressed = true;
+        MouseState.bTouch = true;
     }, false);
     
     Canvas.addEventListener('mousedown', function(evt) {
         MouseState.bPressed = true;
+        MouseState.bTouch = false;
     }, false);
     Canvas.addEventListener('touchstart', function(evt) {
+        event.preventDefault();
+        
         var rect = Canvas.getBoundingClientRect();
         let rectWidth = rect.right - rect.left;
         let rectHeight = rect.bottom - rect.top; 
@@ -202,36 +200,50 @@ function AddMouseListeners()
             break;
         }
         MouseState.bPressed = true;
+        MouseState.bTouch = true;
     }, false);
+
+    function EventEnd(bTouch)
+    {
+        if (MouseState.bPressed)
+        {
+            CacheState();
+
+            for (let buttonName in CanvasButtons)
+            {
+                const {dWidth, dHeight} = TransformWidthHeight(CanvasButtons[buttonName]);
+                const {x, y} = TransformPosition(CanvasButtons[buttonName], dWidth, dHeight);
+                const mousePos = TransformPosition(MouseState.pos);
+
+                if (mousePos.x > x && mousePos.x - x < dWidth && mousePos.y > y && mousePos.y - y < dHeight)
+                {
+                    if (MouseState.bPressed && CanvasButtons[buttonName].onclick)
+                    {
+                        CanvasButtons[buttonName].onclick();
+                    }
+                }
+            }
+
+            if (InitParams.onClick)
+            {
+                InitParams.onClick();
+            }
+        }
+        MouseState.bPressed = false;
+        MouseState.bTouch = bTouch;
+    }
     
     Canvas.addEventListener('mouseup', function(evt) {
-        if (MouseState.bPressed)
-        {
-            CacheState();
-        }
-        MouseState.bPressed = false;
+        EventEnd(false);
+    }, false);
+    Canvas.addEventListener('mouseleave', function(evt) {
+        EventEnd(false);
     }, false);
     Canvas.addEventListener('touchend', function(evt) {
-        if (MouseState.bPressed)
-        {
-            CacheState();
-        }
-        MouseState.bPressed = false;
-    }, false);
-    
-    Canvas.addEventListener('mouseleave', function(evt) {
-        if (MouseState.bPressed)
-        {
-            CacheState();
-        }
-        MouseState.bPressed = false;
+        EventEnd(true);
     }, false);
     Canvas.addEventListener('touchcancel', function(evt) {
-        if (MouseState.bPressed)
-        {
-            CacheState();
-        }
-        MouseState.bPressed = false;
+        EventEnd(true);
     }, false);
 }
 

@@ -24,7 +24,7 @@ full-width: true
     </canvas>
     
     <script>
-        Initialize({canvasId: "canvas-view", width: 0.9, height: 0.9, widthRatio: 4, heightRatio: 3, drawFn: Update, customCursor: {src: document.getElementById("fly"), canvasWidthRatio: 0.05} });
+        Initialize({canvasId: "canvas-view", width: 0.9, height: 0.9, widthRatio: 4, heightRatio: 3, drawFn: Update, onClick: OnClick, customCursor: {src: document.getElementById("fly"), canvasWidthRatio: 0.05} });
 
         let currState = "";
         function ChangeState(newState)
@@ -72,13 +72,9 @@ full-width: true
           }
         }
 
-        // Inputs
-        const onClick = function(){
+        function OnClick() {
           tongue.shoot();
         }
-        Canvas.addEventListener('mousedown', onClick, false);
-        Canvas.addEventListener('touchstart', onClick, false);
-
     </script>
   </body>
 </html>
