@@ -13,6 +13,7 @@ full-width: true
   <body>
     <script src="/assets/js/CanvasHelpers.js"></script>
     <script src="/assets/js/PaintColors.js"></script>
+    <script src="/assets/js/Froggy.js"></script>
     <img id="background" src="/assets/img/background2.png" hidden>
     <img id="title" src="/assets/img/title.png" hidden>
     <img id="frog" src="/assets/img/frog.png" hidden>
@@ -23,46 +24,33 @@ full-width: true
     </canvas>
     
     <script>
-        Initialize({canvasId: "canvas-view", width: 0.9, height: 0.9, widthRatio: 4, heightRatio: 3, drawFn: Update });
+        Initialize({canvasId: "canvas-view", width: 0.9, height: 0.9, widthRatio: 4, heightRatio: 3, drawFn: Update, customCursor: {src: document.getElementById("fly"), canvasWidthRatio: 0.05} });
 
-        const froggy = {
-          state: "idle",
-          start: {x: 0.225, y: 0.65},
-          dest: {x: 0.0, y: 0.0},
-          progress: 0.0,
-          speed: 0.01,
-          getPos: function() {
-            if (this.state != "moving")
-            {
-              return this.start;
-            }
-
-            return {x: this.start.x + ((this.dest.x - this.start.x) * this.progress), y: this.start.y + ((this.dest.y - this.start.y) * this.progress)}
-          },
-          update: function() {
-            if (this.state != "idle") {
-              this.progress += this.speed;
-            }
-            if (this.progress > 1.0)
-            {
-              this.progress = 0.0;
-              this.state = "idle";
-            }
-
-            DrawImage({src: document.getElementById("frog"), x: froggy.getPos().x, y: froggy.getPos().y, canvasWidthRatio: 0.1});
+        let currState = "";
+        function ChangeState(newState)
+        {
+          if (currState == "Init")
+          {
+            RemoveButton("Play");
           }
-        };
 
-        let currState = "Init";
+          currState = newState;
+          if (currState == "Init")
+          {
+            AddButton("Play", {src: document.getElementById("play"), x: 0.7, y: 0.6, canvasWidthRatio: 0.4}, function() {
+              ChangeState("InGame");
+            });
+          }
+        }
+
+        ChangeState("Init");
+
         function Update()
         {
+          Ctx.reset();
           DrawBackground();
           DrawUI();
           DrawEntities();
-
-          // Cursor
-          DrawImage({src: document.getElementById("fly"), x: MouseState.pos.x, y: MouseState.pos.y, canvasWidthRatio: 0.05});
-
         }
 
         function DrawBackground()
@@ -73,19 +61,20 @@ full-width: true
         function DrawEntities()
         {
             froggy.update();
+            tongue.update();
         }
 
         function DrawUI()
         {
+          if (currState == "Init")
+          {
             DrawImage({src: document.getElementById("title"), x: 0.5, y: 0.2, canvasWidthRatio: 0.8});
-            DrawImage({src: document.getElementById("play"), x: 0.7, y: 0.6, canvasWidthRatio: 0.4});
+          }
         }
 
         // Inputs
         const onClick = function(){
-          froggy.state = "moving";
-          froggy.dest = MouseState.pos;
-          froggy.progress = 0.0;
+          tongue.shoot();
         }
         Canvas.addEventListener('mousedown', onClick, false);
         Canvas.addEventListener('touchstart', onClick, false);

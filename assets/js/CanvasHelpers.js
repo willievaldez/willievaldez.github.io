@@ -15,7 +15,8 @@ const InitParams = {
     heightRatio: 0,
     cellSize: 50,
     cellId: null,
-    withStateCache: false
+    withStateCache: false,
+    customCursor: null
 };
 
 const MouseState = 
@@ -23,6 +24,8 @@ const MouseState =
     pos: {x: 0, y: 0},
     bPressed: false
 }
+
+const CanvasButtons = {};
 
 function Initialize(inParams)
 {
@@ -42,6 +45,37 @@ function Initialize(inParams)
         if (InitParams.drawFn)
         {
             InitParams.drawFn();
+
+            for (let buttonName in CanvasButtons)
+            {
+                const {dWidth, dHeight} = TransformWidthHeight(CanvasButtons[buttonName]);
+                const {x, y} = TransformPosition(CanvasButtons[buttonName], dWidth, dHeight);
+                const mousePos = TransformPosition(MouseState.pos);
+
+                if (mousePos.x > x && mousePos.x - x < dWidth && mousePos.y > y && mousePos.y - y < dHeight)
+                {
+                    Ctx.filter = "contrast(1.4)";
+
+                    if (MouseState.bPressed && CanvasButtons[buttonName].onclick)
+                    {
+                        CanvasButtons[buttonName].onclick();
+                        if (!CanvasButtons[buttonName])
+                        {
+                            continue;
+                        }
+                    }
+                }
+                
+                DrawImage(CanvasButtons[buttonName]);
+                Ctx.filter = "";
+            }
+
+            if (InitParams.customCursor)
+            {
+                InitParams.customCursor.x = MouseState.pos.x;
+                InitParams.customCursor.y = MouseState.pos.y;
+                DrawImage(InitParams.customCursor);
+            }
         }
         window.requestAnimationFrame(drawWrapper);
     }
@@ -242,36 +276,58 @@ function SetupUndo()
     });
 }
 
+function AddButton(buttonName, inParams, onclickFn = null)
+{
+    const defaultParams = {src: null, x: 0, y: 0, centered: true, canvasWidthRatio: null, canvasHeightRatio: null, onclick: onclickFn};
+    const params = Object.assign(defaultParams, inParams);
+    CanvasButtons[buttonName] = params;
+}
+
+function RemoveButton(buttonName)
+{
+    delete CanvasButtons[buttonName];
+}
+
 function DrawRect(inParams)
 {
-    const defaultParams = {fillStyle: null, size: 24, bUseGrid: false, xPos: null, yPos: null};
+    const defaultParams = {fillStyle: null, width: 24, height: 24, bUseGrid: false, xPos: null, yPos: null, rot: null, canvasRelative: false};
     const params = Object.assign(defaultParams, inParams);
     if (params.fillStyle)
     {
         Ctx.fillStyle = params.fillStyle;
     }
 
-    if (!params.xPos)
+    if (params.canvasRelative)
+    {
+        params.width *= Canvas.width;
+        params.height *= Canvas.width;
+        params.xPos *= Canvas.width;
+        params.yPos *= Canvas.height;
+    }
+
+    if (params.xPos == null)
     {
         params.xPos = MouseState.pos.x*Canvas.width;
-        params.xPos -= params.bUseGrid ? params.xPos % params.size : params.size/2;
+        params.xPos -= params.bUseGrid ? params.xPos % params.width : params.width/2;
     }
-    if (!params.yPos)
+    if (params.yPos == null)
     {
         params.yPos = MouseState.pos.y*Canvas.height;
-        params.yPos -= params.bUseGrid ? params.yPos % params.size : params.size/2;
+        params.yPos -= params.bUseGrid ? params.yPos % params.height : params.height/2;
     }
 
-
-    Ctx.fillRect(Math.round(params.xPos), Math.round(params.yPos), params.size, params.size);
+    Ctx.resetTransform();
+    Ctx.translate(Math.round(params.xPos), Math.round(params.yPos));
+    if (params.rot)
+    {
+        Ctx.rotate(params.rot);
+    }
+    Ctx.fillRect(0, 0, params.width, params.height);
+    Ctx.resetTransform();
 }
 
-function DrawImage(inParams)
+function TransformWidthHeight(params)
 {
-    const defaultParams = {src: null, x: 0, y: 0, centered: true, canvasWidthRatio: null, canvasHeightRatio: null};
-    const params = Object.assign(defaultParams, inParams);
-
-    // Account for inputted scale
     let dWidth = params.src.naturalWidth;
     let dHeight = params.src.naturalHeight;
     if (params.canvasWidthRatio)
@@ -291,16 +347,34 @@ function DrawImage(inParams)
         }
     }
 
+    return {dWidth, dHeight};
+}
+
+function TransformPosition(params, dWidth, dHeight)
+{
     // Convert to screen space
-    params.x *= Canvas.width;
-    params.y *= Canvas.height;
+    const pos = {x: params.x, y: params.y};
+    pos.x *= Canvas.width;
+    pos.y *= Canvas.height;
 
     // Center if necessary
     if (params.centered)
     {
-        params.x -= dWidth / 2.0;
-        params.y -= dHeight / 2.0;
+        pos.x -= dWidth / 2.0;
+        pos.y -= dHeight / 2.0;
     }
 
-    Ctx.drawImage(params.src, Math.round(params.x), Math.round(params.y), dWidth, dHeight);
+    return pos;
+}
+
+function DrawImage(inParams)
+{
+    const defaultParams = {src: null, x: 0, y: 0, centered: true, canvasWidthRatio: null, canvasHeightRatio: null};
+    const params = Object.assign(defaultParams, inParams);
+
+    const {dWidth, dHeight} = TransformWidthHeight(params);
+    const {x, y} = TransformPosition(params, dWidth, dHeight);
+
+    Ctx.resetTransform();
+    Ctx.drawImage(params.src, Math.round(x), Math.round(y), dWidth, dHeight);
 }

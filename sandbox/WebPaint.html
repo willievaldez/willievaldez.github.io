@@ -151,7 +151,7 @@ full-width: true
             drawFn: ()=>{
             if (MouseState.bPressed)
             {
-              DrawRect({size: localStorage.penSize,
+              DrawRect({width: localStorage.penSize, height: localStorage.penSize,
                    fillStyle: rgbToHex(dqsValue('#red-slider'), dqsValue('#green-slider'), dqsValue('#blue-slider')),
                     bUseGrid: document.querySelector("#use-grid").checked});
             }
