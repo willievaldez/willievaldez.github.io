@@ -174,7 +174,6 @@ function AddMouseListeners()
     }, false);
     
     Canvas.addEventListener('touchmove', function(evt) {
-        MouseState.bPressed = true;
         var rect = Canvas.getBoundingClientRect();
         let rectWidth = rect.right - rect.left;
         let rectHeight = rect.bottom - rect.top; 
@@ -183,20 +182,26 @@ function AddMouseListeners()
                 x: (changedTouch.pageX - rect.left - window.scrollX) / rectWidth,
                 y: (changedTouch.pageY - rect.top - window.scrollY) / rectHeight
             };
-
-            if (InitParams.drawFn)
-            {
-                InitParams.drawFn();
-            }
+            break;
         }
-        MouseState.bPressed = false;
+        MouseState.bPressed = true;
     }, false);
     
     Canvas.addEventListener('mousedown', function(evt) {
         MouseState.bPressed = true;
     }, false);
     Canvas.addEventListener('touchstart', function(evt) {
-        // MouseState.bPressed = true;
+        var rect = Canvas.getBoundingClientRect();
+        let rectWidth = rect.right - rect.left;
+        let rectHeight = rect.bottom - rect.top; 
+        for (const changedTouch of evt.changedTouches) {
+            MouseState.pos = {
+                x: (changedTouch.pageX - rect.left - window.scrollX) / rectWidth,
+                y: (changedTouch.pageY - rect.top - window.scrollY) / rectHeight
+            };
+            break;
+        }
+        MouseState.bPressed = true;
     }, false);
     
     Canvas.addEventListener('mouseup', function(evt) {
@@ -211,7 +216,7 @@ function AddMouseListeners()
         {
             CacheState();
         }
-        // MouseState.bPressed = false;
+        MouseState.bPressed = false;
     }, false);
     
     Canvas.addEventListener('mouseleave', function(evt) {
@@ -226,7 +231,7 @@ function AddMouseListeners()
         {
             CacheState();
         }
-        // MouseState.bPressed = false;
+        MouseState.bPressed = false;
     }, false);
 }
 
