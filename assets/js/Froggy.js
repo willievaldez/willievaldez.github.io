@@ -24,59 +24,106 @@ const froggy = {
         }
 
         DrawImage({src: document.getElementById("frog"), x: froggy.getPos().x, y: froggy.getPos().y, canvasWidthRatio: 0.1});
+        this.tongue.update();
+    },
+
+    
+    tongue: {
+        // properties of tongue
+        speed: 15,
+        width: 0.01,
+        color: "#99253C",
+        offset: {x: 0.0375, y: -0.005},
+
+        // vars used when moving
+        state: "idle",
+        dir: {x: 1.0, y: 0.0},
+        rot: 0.0,
+        len: 0.0,
+        progress: 0,
+
+        getSrc: function() {
+            const src = froggy.getPos();
+            return {x: src.x + this.offset.x, y: src.y + this.offset.y};
+        },
+
+        shoot: function() {
+            if (this.state != "idle")
+            {
+                return;
+            }
+
+            this.progress = 0;
+            this.state = "moving";
+
+            const src = this.getSrc();
+            this.dir = {x: (MouseState.pos.x - src.x) * Canvas.width, y: (MouseState.pos.y - src.y) * Canvas.height};
+            this.len = Math.sqrt(Math.pow(this.dir.x, 2) + Math.pow(this.dir.y, 2));
+            this.rot = Math.atan(this.dir.y / this.dir.x);
+
+            // Normalize direction vector
+            this.dir = {x: this.dir.x / this.len, y: this.dir.y / this.len};
+
+            if (this.dir.x < 0)
+            {
+                this.rot += Math.PI;
+            }
+        },
+        update: function() {
+            if (this.state != "moving")
+            {
+                return;
+            }
+
+            const tongueLen = (++this.progress * this.speed);
+            const src = this.getSrc();
+            DrawRect({fillStyle: this.color, width: tongueLen, height: this.width * Canvas.height, xPos: src.x * Canvas.width, yPos: src.y * Canvas.height, rot: this.rot});
+
+            const tongueTip = {x: (src.x * Canvas.width) + (this.dir.x * tongueLen), y: (src.y * Canvas.height) + (this.dir.y * tongueLen)};
+            DrawRect({fillStyle: this.color, xPos: tongueTip.x, yPos: tongueTip.y, rot: this.rot});
+
+            let i = flies.entities.length;
+            while (i--)
+            {
+                const flyPos = flies.entities[i].pos;
+                const sqDist = Math.pow(flyPos.x - (tongueTip.x / Canvas.width), 2) + Math.pow(flyPos.y - (tongueTip.y / Canvas.height), 2);
+                if (sqDist < 0.005)
+                {
+                    flies.entities.splice(i, 1);
+                    this.state = "idle"
+                    flies.add(1, 0.2, 0.8, 0.1, 0.5);
+                }
+            }
+
+            if (tongueLen >= this.len)
+            {
+                this.state = "idle"
+            }
+        }
     }
 };
 
-const tongue = {
-    // properties of tongue
-    speed: 0.02,
-    width: 0.01,
-    color: "#99253C",
-    offset: {x: 0.0375, y: -0.005},
-
-    // vars used when moving
-    state: "idle",
-    rot: 0.0,
-    len: 0.0,
-    progress: 0,
-
-    getSrc: function() {
-        const src = froggy.getPos();
-        return {x: src.x + this.offset.x, y: src.y + this.offset.y};
-    },
-
-    shoot: function() {
-        if (this.state != "idle")
+const flies = {
+    entities: [],
+    add: function(qty, xmin, xmax, ymin, ymax)
+    {
+        const xrange = xmax - xmin;
+        const yrange = ymax - ymin;
+        for (let i = 0; i < qty; i++)
         {
-            return;
-        }
+            const randx = (Math.random() * xrange) + xmin;
+            const randy = (Math.random() * yrange) + ymin;
 
-        this.progress = 0;
-        this.state = "moving";
-
-        const src = this.getSrc();
-        let dir = {x: (MouseState.pos.x - src.x) * Canvas.width, y: (MouseState.pos.y - src.y) * Canvas.height};
-        this.len = Math.sqrt(Math.pow(dir.x, 2) + Math.pow(dir.y, 2));
-        this.rot = Math.atan(dir.y / dir.x);
-
-        if (dir.x < 0)
-        {
-            this.rot += Math.PI;
+            this.entities.push({
+                pos: {x: randx, y: randy}
+            })
         }
     },
-    update: function() {
-        if (this.state != "moving")
+    update: function()
+    {
+        for (const fly of this.entities)
         {
-            return;
-        }
-
-        const tongueLen = (++this.progress * this.speed) * this.len;
-        const src = this.getSrc();
-        DrawRect({fillStyle: this.color, width: tongueLen, height: this.width * Canvas.height, bUseGrid: false, xPos: src.x * Canvas.width, yPos: src.y * Canvas.height, canvasRelative: false, rot: this.rot});
-
-        if (tongueLen >= this.len)
-        {
-            this.state = "idle"
+            DrawImage({src: document.getElementById("fly"), x: fly.pos.x, y: fly.pos.y, canvasWidthRatio: 0.05});
         }
     }
-}
+};
