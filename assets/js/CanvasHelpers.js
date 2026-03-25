@@ -309,11 +309,6 @@ function DrawRect(inParams)
 {
     const defaultParams = {fillStyle: null, width: 24, height: 24, bUseGrid: false, xPos: null, yPos: null, rot: null, canvasRelative: false};
     const params = Object.assign(defaultParams, inParams);
-    if (params.fillStyle)
-    {
-        Ctx.fillStyle = params.fillStyle;
-    }
-
     if (params.canvasRelative)
     {
         params.width *= Canvas.width;
@@ -339,7 +334,20 @@ function DrawRect(inParams)
     {
         Ctx.rotate(params.rot);
     }
-    Ctx.fillRect(0, 0, params.width, params.height);
+
+    if (params.fillStyle != "clear")
+    {
+        if (params.fillStyle)
+        {
+            Ctx.fillStyle = params.fillStyle;
+        }
+
+        Ctx.fillRect(0, 0, params.width, params.height);
+    }
+    else
+    {
+        Ctx.clearRect(0, 0, params.width, params.height);
+    }
     Ctx.resetTransform();
 }
 

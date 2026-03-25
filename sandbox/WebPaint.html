@@ -89,7 +89,13 @@ full-width: true
         <option value="px">px</option>
       </select>
     </div>
-    <button id="export">Export</button>
+    <br>
+    <div class="flex">
+      <label for="import" class="btn">Import</label>
+      <input type="file" id="import" accept="image/*" style="display:none;">
+      <button id="export">Export</button>
+
+    </div>
     
     <script>
         function dqsValue(selector)
@@ -151,9 +157,10 @@ full-width: true
             drawFn: ()=>{
             if (MouseState.bPressed)
             {
+              const eraser = localStorage.currentPallete == 9;
               DrawRect({width: localStorage.penSize, height: localStorage.penSize,
-                   fillStyle: rgbToHex(dqsValue('#red-slider'), dqsValue('#green-slider'), dqsValue('#blue-slider')),
-                    bUseGrid: document.querySelector("#use-grid").checked});
+                  fillStyle: eraser ? "clear" : rgbToHex(dqsValue('#red-slider'), dqsValue('#green-slider'), dqsValue('#blue-slider')),
+                  bUseGrid: document.querySelector("#use-grid").checked});
             }
         }});
 
@@ -184,6 +191,27 @@ full-width: true
         SetupPallete();
         SetupColorSliders();
 
+        // Import
+        document.getElementById('import').addEventListener('change', function (event) {  
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.src = e.target.result;
+                img.onload = function() {
+                  localStorage.width = img.naturalWidth;
+                  localStorage.widthType = "px";
+                  localStorage.height = img.naturalHeight;
+                  localStorage.heightType = "px";
+                  SetupCanvasSizeElements("width");
+                  SetupCanvasSizeElements("height");
+                  onCanvasSizeChanged();
+
+                  DrawImage({src: img, centered: false});
+                };
+            };
+            reader.readAsDataURL(event.target.files[0]);
+        });
+        
         // Export
         document.querySelector("#export").onclick = function()
         {
