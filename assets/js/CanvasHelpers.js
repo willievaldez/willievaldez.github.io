@@ -100,44 +100,44 @@ function Resize(inParams)
 
 function ResizeCanvas()
 {
-    const tempImg = new Image();
-    tempImg.src = Canvas.toDataURL();
-
+    let newWidth = InitParams.width;
     if (InitParams.widthType == "%")
     {
-        Canvas.width = window.innerWidth * InitParams.width;
-    }
-    else if (InitParams.widthType == "px")
-    {
-        Canvas.width = InitParams.width;
+        newWidth = window.innerWidth * InitParams.width;
     }
 
+    let newHeight = InitParams.height;
     if (InitParams.heightType == "%")
     {
-        Canvas.height = window.innerHeight * InitParams.height;
-    }
-    else if (InitParams.heightType == "px")
-    {
-        Canvas.height = InitParams.height;
+        newHeight = window.innerHeight * InitParams.height;
     }
 
     if (InitParams.heightRatio && InitParams.widthRatio)
     {
-        const calculatedWidth = Canvas.height * InitParams.widthRatio / InitParams.heightRatio;
-        const calculatedHeight = Canvas.width * InitParams.heightRatio / InitParams.widthRatio;
-        if (Canvas.width > calculatedWidth)
+        const calculatedWidth = newHeight * InitParams.widthRatio / InitParams.heightRatio;
+        const calculatedHeight = newWidth * InitParams.heightRatio / InitParams.widthRatio;
+        if (newWidth > calculatedWidth)
         {
-            Canvas.width = calculatedWidth;
+            newWidth = calculatedWidth;
         }
-        else if (Canvas.height > calculatedHeight)
+        else if (newHeight > calculatedHeight)
         {
-            Canvas.height = calculatedHeight;
+            newHeight = calculatedHeight;
         }
     }
 
-    tempImg.onload = ()=>{
-        DrawImage({src: tempImg, x: 0, y: 0, canvasWidthRatio: 1.0, canvasHeightRatio: 1.0});
-    };
+    if (Canvas.width != newWidth || Canvas.height != newHeight)
+    {
+        const tempImg = new Image();
+        tempImg.src = Canvas.toDataURL();
+
+        Canvas.width = newWidth;
+        Canvas.height = newHeight;
+
+        tempImg.onload = ()=>{
+            DrawImage({src: tempImg, x: 0, y: 0, canvasWidthRatio: 1.0, canvasHeightRatio: 1.0});
+        };
+    }
 }
 
 function AddResizeListener()
