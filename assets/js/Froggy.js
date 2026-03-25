@@ -30,7 +30,7 @@ const froggy = {
     
     tongue: {
         // properties of tongue
-        speed: 15,
+        speed: 1,
         width: 0.01,
         color: "#99253C",
         offset: {x: 0.0375, y: -0.005},
@@ -40,7 +40,7 @@ const froggy = {
         dir: {x: 1.0, y: 0.0},
         rot: 0.0,
         len: 0.0,
-        progress: 0,
+        startTime: null,
 
         getSrc: function() {
             const src = froggy.getPos();
@@ -53,7 +53,7 @@ const froggy = {
                 return;
             }
 
-            this.progress = 0;
+            this.startTime = Date.now();
             this.state = "moving";
 
             const src = this.getSrc();
@@ -75,12 +75,13 @@ const froggy = {
                 return;
             }
 
-            const tongueLen = (++this.progress * this.speed);
+            const timeSpent = Date.now() - this.startTime;
+            const tongueLen = timeSpent * this.speed;
             const src = this.getSrc();
             DrawRect({fillStyle: this.color, width: tongueLen, height: this.width * Canvas.height, xPos: src.x * Canvas.width, yPos: src.y * Canvas.height, rot: this.rot});
 
             const tongueTip = {x: (src.x * Canvas.width) + (this.dir.x * tongueLen), y: (src.y * Canvas.height) + (this.dir.y * tongueLen)};
-            DrawRect({fillStyle: this.color, xPos: tongueTip.x, yPos: tongueTip.y, rot: this.rot});
+            // DrawRect({fillStyle: this.color, xPos: tongueTip.x, yPos: tongueTip.y, rot: this.rot});
 
             let i = flies.entities.length;
             while (i--)
