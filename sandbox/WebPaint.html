@@ -204,12 +204,16 @@ full-width: true
                   localStorage.heightType = "px";
                   SetupCanvasSizeElements("width");
                   SetupCanvasSizeElements("height");
-                  onCanvasSizeChanged();
 
+                  // Change size of canvas (destructively)
+                  Canvas.width = img.naturalWidth;
+                  Canvas.height = img.naturalHeight;
+                  Ctx.reset();
                   DrawImage({src: img, centered: false});
                 };
             };
             reader.readAsDataURL(event.target.files[0]);
+            this.value = null;
         });
         
         // Export

@@ -4,7 +4,6 @@ let Ctx = null;
 const InitParams = {
     canvasId: null,
     drawFn: null,
-    onResize: null,
     width: 0.8,
     widthType: "%",
     widthId: null,
@@ -136,16 +135,9 @@ function ResizeCanvas()
         }
     }
 
-    if (InitParams.onResize)
-    {
-        InitParams.onResize();
-    }
-    else
-    {
-        tempImg.onload = ()=>{
-            DrawImage({src: tempImg, x: 0, y: 0, canvasWidthRatio: 1.0, canvasHeightRatio: 1.0});
-        };
-    }
+    tempImg.onload = ()=>{
+        DrawImage({src: tempImg, x: 0, y: 0, canvasWidthRatio: 1.0, canvasHeightRatio: 1.0});
+    };
 }
 
 function AddResizeListener()
