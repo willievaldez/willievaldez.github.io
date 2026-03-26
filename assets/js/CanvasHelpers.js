@@ -42,10 +42,13 @@ function Initialize(inParams)
         SetupUndo();
     }
 
+    let lastTick = Date.now();
     function drawWrapper() {
         if (InitParams.drawFn)
         {
-            InitParams.drawFn();
+            const currTick = Date.now();
+            InitParams.drawFn(currTick - lastTick);
+            lastTick = currTick;
 
             for (let buttonName in CanvasButtons)
             {

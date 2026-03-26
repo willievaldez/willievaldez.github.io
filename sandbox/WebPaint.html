@@ -154,7 +154,7 @@ full-width: true
             widthType: dqsValue("#width-type"),
             height: dqsValue("#height-text"),
             heightType: dqsValue("#height-type"),
-            drawFn: ()=>{
+            drawFn: (deltaTimeMS)=>{
             if (MouseState.bPressed)
             {
               const eraser = localStorage.currentPallete == 9;
