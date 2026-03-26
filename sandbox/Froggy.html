@@ -18,19 +18,18 @@ full-width: true
     <img id="title" src="/assets/img/title.png" hidden>
     <img id="frog" src="/assets/img/whites_tree_frog.png" hidden>
     <img id="fly" src="/assets/img/fly.png" hidden>
+    <img id="empty" src="/assets/img/empty.png" hidden>
     <img id="play" src="/assets/img/play.png" hidden>
     <canvas id="canvas-view" style="cursor: none">
       Your browser does not seem to support HTML canvas.
     </canvas>
     <div id="debug" hidden>
       <p id="tick">0ms</p>
-      <p id="len_scr">0</p>
-      <p id="len_world">0</p>
     </div>
     
     <script>
         Initialize({canvasId: "canvas-view", width: 0.9, height: 0.8, widthRatio: 4, heightRatio: 3, drawFn: Update, onClick: OnClick, customCursor: {src: document.getElementById("fly"), canvasWidthRatio: 0.05} });
-        AddButton("Debug", {src: document.getElementById("fly"), x: 0.0, y: 0.0, canvasWidthRatio: 0.05}, function() {
+        AddButton("Debug", {src: document.getElementById("empty"), x: 0.0, y: 0.0, canvasWidthRatio: 0.05}, function() {
                       const debugDiv = document.getElementById("debug");
                       debugDiv.hidden = !debugDiv.hidden;
                     });
@@ -60,6 +59,7 @@ full-width: true
 
         function Update(deltaTimeMS)
         {
+          // Debug info
           document.getElementById("tick").textContent = deltaTimeMS;
 
           Ctx.reset();

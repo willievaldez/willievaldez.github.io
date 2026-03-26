@@ -85,9 +85,6 @@ const froggy = {
             const timeSpent = Date.now() - this.startTime;
             const tongueLen = XToScreenSpace(timeSpent * this.speed);
 
-            document.getElementById("len_scr").textContent = tongueLen;
-            document.getElementById("len_world").textContent = timeSpent;
-
             const startScreenSpace = this.getSrc(true);
             DrawRect({fillStyle: this.color, width: tongueLen, height: YToScreenSpace(this.width), xPos: startScreenSpace.x, yPos: startScreenSpace.y, rot: this.rot});
 
