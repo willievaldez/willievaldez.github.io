@@ -304,19 +304,19 @@ function DrawRect(inParams)
     if (params.canvasRelative)
     {
         params.width *= Canvas.width;
-        params.height *= Canvas.width;
+        params.height *= Canvas.width; // Use width instead (drawing a square should be square)
         params.xPos *= Canvas.width;
         params.yPos *= Canvas.height;
     }
 
     if (params.xPos == null)
     {
-        params.xPos = MouseState.pos.x*Canvas.width;
+        params.xPos = XToScreenSpace(MouseState.pos.x);
         params.xPos -= params.bUseGrid ? params.xPos % params.width : params.width/2;
     }
     if (params.yPos == null)
     {
-        params.yPos = MouseState.pos.y*Canvas.height;
+        params.yPos = YToScreenSpace(MouseState.pos.y);
         params.yPos -= params.bUseGrid ? params.yPos % params.height : params.height/2;
     }
 
@@ -367,12 +367,25 @@ function TransformWidthHeight(params)
     return {dWidth, dHeight};
 }
 
+function XToScreenSpace(x)
+{
+    return x * Canvas.width;
+}
+
+function YToScreenSpace(y)
+{
+    return y * Canvas.height;
+}
+
+function ToScreenSpace(x, y)
+{
+    return {x: XToScreenSpace(x), y: YToScreenSpace(y)}
+}
+
 function TransformPosition(params, dWidth, dHeight)
 {
     // Convert to screen space
-    const pos = {x: params.x, y: params.y};
-    pos.x *= Canvas.width;
-    pos.y *= Canvas.height;
+    const pos = ToScreenSpace(params.x, params.y);
 
     // Center if necessary
     if (params.centered)

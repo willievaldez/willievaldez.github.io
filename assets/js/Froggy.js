@@ -30,7 +30,7 @@ const froggy = {
     
     tongue: {
         // properties of tongue
-        speed: 1,
+        speed: 750,
         width: 0.01,
         color: "#99253C",
         offset: {x: 0.0375, y: -0.005},
@@ -42,9 +42,16 @@ const froggy = {
         len: 0.0,
         startTime: null,
 
-        getSrc: function() {
+        getSrc: function(bScreenSpace) {
             const src = froggy.getPos();
-            return {x: src.x + this.offset.x, y: src.y + this.offset.y};
+            if (bScreenSpace)
+            {
+                return ToScreenSpace(src.x + this.offset.x, src.y + this.offset.y);
+            }
+            else
+            {
+                return {x: src.x + this.offset.x, y: src.y + this.offset.y};
+            }
         },
 
         shoot: function() {
@@ -56,8 +63,8 @@ const froggy = {
             this.startTime = Date.now();
             this.state = "moving";
 
-            const src = this.getSrc();
-            this.dir = {x: (MouseState.pos.x - src.x) * Canvas.width, y: (MouseState.pos.y - src.y) * Canvas.height};
+            const src = this.getSrc(false);
+            this.dir = ToScreenSpace(MouseState.pos.x - src.x, MouseState.pos.y - src.y);
             this.len = Math.sqrt(Math.pow(this.dir.x, 2) + Math.pow(this.dir.y, 2));
             this.rot = Math.atan(this.dir.y / this.dir.x);
 
@@ -76,11 +83,11 @@ const froggy = {
             }
 
             const timeSpent = Date.now() - this.startTime;
-            const tongueLen = timeSpent * this.speed;
-            const src = this.getSrc();
-            DrawRect({fillStyle: this.color, width: tongueLen, height: this.width * Canvas.height, xPos: src.x * Canvas.width, yPos: src.y * Canvas.height, rot: this.rot});
+            const tongueLen = (timeSpent * this.speed) / Canvas.width;
+            const startScreenSpace = this.getSrc(true);
+            DrawRect({fillStyle: this.color, width: tongueLen, height: YToScreenSpace(this.width), xPos: startScreenSpace.x, yPos: startScreenSpace.y, rot: this.rot});
 
-            const tongueTip = {x: (src.x * Canvas.width) + (this.dir.x * tongueLen), y: (src.y * Canvas.height) + (this.dir.y * tongueLen)};
+            const tongueTip = {x: (startScreenSpace.x) + (this.dir.x * tongueLen), y: (startScreenSpace.y) + (this.dir.y * tongueLen)};
             // DrawRect({fillStyle: this.color, xPos: tongueTip.x, yPos: tongueTip.y, rot: this.rot});
 
             let i = flies.entities.length;
