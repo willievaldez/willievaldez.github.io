@@ -60,7 +60,10 @@ const froggy = {
                 return;
             }
 
-            document.getElementById("tongue-launch").play();
+            const sound = document.getElementById("tongue-launch");
+            sound.pause();
+            sound.currentTime = 0;
+            sound.play();
 
             this.startTime = Date.now();
             this.state = "moving";
