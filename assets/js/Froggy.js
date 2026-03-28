@@ -60,6 +60,8 @@ const froggy = {
                 return;
             }
 
+            document.getElementById("tongue-launch").play();
+
             this.startTime = Date.now();
             this.state = "moving";
 
@@ -96,10 +98,11 @@ const froggy = {
             {
                 const flyPos = flies.entities[i].pos;
                 const sqDist = Math.pow(flyPos.x - (tongueTip.x / Canvas.width), 2) + Math.pow(flyPos.y - (tongueTip.y / Canvas.height), 2);
-                if (sqDist < 0.005)
+                if (sqDist < 0.001)
                 {
                     flies.entities.splice(i, 1);
                     this.state = "idle"
+                    document.getElementById("tongue-hit").play();
                     flies.add(1, 0.2, 0.8, 0.1, 0.5);
                 }
             }
