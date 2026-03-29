@@ -293,6 +293,18 @@ function SetupUndo()
     });
 }
 
+function GetPixel(x, y, canvasRelative = true)
+{
+    if (canvasRelative)
+    {
+        x = XToScreenSpace(x);
+        y = YToScreenSpace(y);
+    }
+
+    const [ r, g, b, a ] = Ctx.getImageData( x, y, 1, 1 ).data;
+    return {r,g,b,a};
+}
+
 function AddButton(buttonName, inParams, onclickFn = null)
 {
     const defaultParams = {src: null, x: 0, y: 0, centered: true, canvasWidthRatio: null, canvasHeightRatio: null, toggleState: null, onclick: onclickFn};

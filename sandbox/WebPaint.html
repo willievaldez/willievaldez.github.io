@@ -30,6 +30,18 @@ full-width: true
           <th style="width:10%" id="pallete-8"></th>
           <th style="width:10%" id="pallete-9"></th>
         </tr>
+        <tr>
+          <td><button id="copy-0" style="padding:0%">Copy</button></td>
+          <td><button id="copy-1" style="padding:0%">Copy</button></td>
+          <td><button id="copy-2" style="padding:0%">Copy</button></td>
+          <td><button id="copy-3" style="padding:0%">Copy</button></td>
+          <td><button id="copy-4" style="padding:0%">Copy</button></td>
+          <td><button id="copy-5" style="padding:0%">Copy</button></td>
+          <td><button id="copy-6" style="padding:0%">Copy</button></td>
+          <td><button id="copy-7" style="padding:0%">Copy</button></td>
+          <td><button id="copy-8" style="padding:0%">Copy</button></td>
+          <td><button id="sample" style="padding:0%" data-active="false">Sample</button></td>
+        </tr>
       </tbody>
     </table>
     <table style="width:90%">
@@ -157,10 +169,20 @@ full-width: true
             drawFn: (deltaTimeMS)=>{
             if (MouseState.bPressed)
             {
-              const eraser = localStorage.currentPallete == 9;
-              DrawRect({width: localStorage.penSize, height: localStorage.penSize,
-                  fillStyle: eraser ? "clear" : rgbToHex(dqsValue('#red-slider'), dqsValue('#green-slider'), dqsValue('#blue-slider')),
-                  bUseGrid: document.querySelector("#use-grid").checked});
+              const sampleButton = document.getElementById(`sample`);
+              if (sampleButton.getAttribute('data-active') == 'true')
+              {
+                const {r, g, b} = GetPixel(MouseState.pos.x, MouseState.pos.y);
+                SetPalleteColor(localStorage.currentPallete, r, g, b);
+                sampleButton.setAttribute('data-active', sampleButton.getAttribute('data-active') != 'true');
+              }
+              else
+              {
+                const eraser = localStorage.currentPallete == 9;
+                DrawRect({width: localStorage.penSize, height: localStorage.penSize,
+                    fillStyle: eraser ? "clear" : rgbToHex(dqsValue('#red-slider'), dqsValue('#green-slider'), dqsValue('#blue-slider')),
+                    bUseGrid: document.querySelector("#use-grid").checked});
+              }
             }
         }});
 

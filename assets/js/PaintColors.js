@@ -17,13 +17,66 @@ function GetColorFor(colorName, value)
     return color;
 }
 
-// Source - https://stackoverflow.com/a/5624139
-// Posted by Tim Down, modified by community. See post 'Timeline' for change history
-// Retrieved 2026-03-03, License - CC BY-SA 4.0
-
 function rgbToHex(r, g, b) {
-    const hex = "#" + (1 << 24 | r << 16 | g << 8 | b).toString(16).slice(1);
-    return hex.toUpperCase();
+    return `#${ToHex(r)}${ToHex(g)}${ToHex(b)}`;
+}
+
+function ToHex(dec)
+{
+    let hexStr = parseInt(dec).toString(16).toUpperCase();
+    if (hexStr.length == 1)
+    {
+        hexStr = "0" + hexStr;
+    }
+
+    return hexStr;
+}
+
+function SetSelectedSliderData(palleteNum)
+{
+    document.querySelector(`#pallete-${localStorage.currentPallete}`).className = "";
+    localStorage.currentPallete = palleteNum;
+    const eraser = palleteNum == 9;
+    document.querySelector(`#pallete-${localStorage.currentPallete}`).className = "selected";
+
+    for (let colorName of ["red", "green", "blue"])
+    {
+        const Slider = document.querySelector(`#${colorName}-slider`);
+        const SliderPreview = document.querySelector(`#${colorName}-preview`);
+        const SliderText = document.querySelector(`#${colorName}-text`);
+
+        if (!eraser)
+        {
+            const localStorageId = `pallete${localStorage.currentPallete}-${colorName[0]}`;
+            SliderPreview.style.backgroundColor = GetColorFor(colorName, localStorage[localStorageId]);
+            SliderText.textContent = ToHex(localStorage[localStorageId]);
+            Slider.value = localStorage[localStorageId];
+            Slider.disabled = false;
+        }
+        else
+        {
+            SliderPreview.style.backgroundColor = "#FFFFFF";
+            SliderText.textContent = "#NIL";
+            Slider.value = 255;
+            Slider.disabled = true;
+        }
+    }
+}
+
+function SetPalleteColor(palleteNum, r, g, b)
+{
+    localStorage[`pallete${palleteNum}-r`] = r;
+    localStorage[`pallete${palleteNum}-g`] = g;
+    localStorage[`pallete${palleteNum}-b`] = b;
+    SetSelectedSliderData(palleteNum);
+
+    const pallete = document.querySelector(`#pallete-${palleteNum}`)
+    const colorValue = rgbToHex(r, g, b);
+    pallete.textContent = colorValue;
+    pallete.style.backgroundColor = colorValue;
+    
+    const sum = parseInt(r)+ parseInt(g)+ parseInt(b);
+    pallete.style.color = sum > 382.5 ? "black" : "white";
 }
 
 function SetupPallete()
@@ -33,37 +86,6 @@ function SetupPallete()
         localStorage.currentPallete = 0;
     }
 
-    function setSelectedSliderData(palleteNum)
-    {
-        document.querySelector(`#pallete-${localStorage.currentPallete}`).className = "";
-        localStorage.currentPallete = palleteNum;
-        const eraser = palleteNum == 9;
-        document.querySelector(`#pallete-${localStorage.currentPallete}`).className = "selected";
-
-        for (let colorName of ["red", "green", "blue"])
-        {
-            const Slider = document.querySelector(`#${colorName}-slider`);
-            const SliderPreview = document.querySelector(`#${colorName}-preview`);
-            const SliderText = document.querySelector(`#${colorName}-text`);
-
-            if (!eraser)
-            {
-                const localStorageId = `pallete${localStorage.currentPallete}-${colorName[0]}`;
-                SliderPreview.style.backgroundColor = GetColorFor(colorName, localStorage[localStorageId]);
-                SliderText.textContent = localStorage[localStorageId];
-                Slider.value = localStorage[localStorageId];
-                Slider.disabled = false;
-            }
-            else
-            {
-                SliderPreview.style.backgroundColor = "#FFFFFF";
-                SliderText.textContent = "#NIL";
-                Slider.value = 255;
-                Slider.disabled = true;
-            }
-        }
-    }
-    
     // Setup first 9 palletes; 10th pallete is reserved as eraser
     for (let i = 0; i < 10; ++i)
     {
@@ -83,7 +105,7 @@ function SetupPallete()
 
         if (selected)
         {
-            setSelectedSliderData(i);
+            SetSelectedSliderData(i);
         }
 
         if (!eraser)
@@ -94,15 +116,25 @@ function SetupPallete()
             
             const sum = parseInt(localStorage[`pallete${i}-r`])+ parseInt(localStorage[`pallete${i}-g`])+ parseInt(localStorage[`pallete${i}-b`]);
             pallete.style.color = sum > 382.5 ? "black" : "white";
+
+            // Setup copy button click
+            document.getElementById(`copy-${i}`).onclick = function() {
+                SetPalleteColor(localStorage.currentPallete, localStorage[`pallete${i}-r`], localStorage[`pallete${i}-g`], localStorage[`pallete${i}-b`]);
+            }
         }
         else
         {
             pallete.textContent = "Eraser";
             pallete.style.backgroundColor = "#BBBBBB";
             pallete.style.color = "black";
+
+            // Setup sample button click
+            document.getElementById(`sample`).onclick = function() {
+                this.setAttribute('data-active', this.getAttribute('data-active') != 'true');
+            }
         }
 
-        pallete.onclick = function() { setSelectedSliderData(i); };
+        pallete.onclick = function() { SetSelectedSliderData(i); };
     }
 }
 
@@ -124,7 +156,7 @@ function SetupColorSliders(callback = null, previewId = null)
             }
 
             SliderPreview.style.backgroundColor = GetColorFor(colorName, localStorage[localStorageId]);
-            SliderText.textContent = localStorage[localStorageId];
+            SliderText.textContent = ToHex(localStorage[localStorageId]);
             Slider.value = localStorage[localStorageId];
             Slider.disabled = false;
         }
@@ -167,7 +199,7 @@ function SetupColorSliders(callback = null, previewId = null)
         {
             Slider.oninput = function() {
                 SliderPreview.style.backgroundColor = GetColorFor(colorName, this.value);
-                SliderText.textContent = this.value;
+                SliderText.textContent = ToHex(this.value);
                 localStorage[`pallete${localStorage.currentPallete}-${colorName[0]}`] = this.value;
                 callbackWrapper();
             }
