@@ -13,7 +13,7 @@ const froggy = {
 
         return {x: this.start.x + ((this.dest.x - this.start.x) * this.progress), y: this.start.y + ((this.dest.y - this.start.y) * this.progress)}
     },
-    update: function() {
+    update: function(deltaTimeMS) {
         if (this.state != "idle") {
             this.progress += this.speed;
         }
@@ -24,7 +24,7 @@ const froggy = {
         }
 
         DrawImage({src: document.getElementById("frog"), x: froggy.getPos().x, y: froggy.getPos().y, canvasWidthRatio: 0.1});
-        this.tongue.update();
+        this.tongue.update(deltaTimeMS);
     },
     
     tongue: {
@@ -39,7 +39,7 @@ const froggy = {
         dir: {x: 1.0, y: 0.0},
         rot: 0.0,
         len: 0.0,
-        startTime: null,
+        timeElapsed: 0,
 
         getSrc: function(bScreenSpace) {
             const src = froggy.getPos();
@@ -64,7 +64,7 @@ const froggy = {
             sound.currentTime = 0;
             sound.play();
 
-            this.startTime = Date.now();
+            this.timeElapsed = 0;
             this.state = "moving";
 
             const src = this.getSrc(false);
@@ -80,20 +80,19 @@ const froggy = {
                 this.rot += Math.PI;
             }
         },
-        update: function() {
+        update: function(deltaTimeMS) {
             if (this.state != "moving")
             {
                 return;
             }
 
-            const timeSpent = Date.now() - this.startTime;
-            const tongueLen = XToScreenSpace(timeSpent * this.speed);
+            this.timeElapsed += deltaTimeMS;
+            const tongueLen = XToScreenSpace(this.timeElapsed * this.speed);
 
             const startScreenSpace = this.getSrc(true);
             DrawRect({fillStyle: this.color, width: tongueLen, height: YToScreenSpace(this.width), xPos: startScreenSpace.x, yPos: startScreenSpace.y, rot: this.rot});
 
             const tongueTip = {x: (startScreenSpace.x) + (this.dir.x * tongueLen), y: (startScreenSpace.y) + (this.dir.y * tongueLen)};
-            // DrawRect({fillStyle: this.color, xPos: tongueTip.x, yPos: tongueTip.y, rot: this.rot});
 
             let i = flies.entities.length;
             while (i--)
@@ -118,7 +117,7 @@ const froggy = {
 };
 
 const flies = {
-    speed: 0.005,
+    speed: 0.25,
     spawnArea: {ymin: 0.05, ymax: 0.45},
     entities: [],
     add: function(qty)
@@ -135,15 +134,16 @@ const flies = {
             })
         }
     },
-    update: function()
+    update: function(deltaTimeMS)
     {
+        const deltaTimeSecs = deltaTimeMS / 1000.0;
         let i = flies.entities.length;
         while (i--)
         {
             const fly = flies.entities[i];
             const halfSpeed = this.speed / 2.0;
-            fly.pos.x += (Math.random() * this.speed) - (halfSpeed) + fly.dir;
-            fly.pos.y += (Math.random() * halfSpeed) - (halfSpeed / 2.0);
+            fly.pos.x += ((Math.random() * this.speed) - (halfSpeed) + fly.dir) * deltaTimeSecs;
+            fly.pos.y += ((Math.random() * halfSpeed) - (halfSpeed / 2.0)) * deltaTimeSecs;
             DrawImage({src: document.getElementById("fly"), x: fly.pos.x, y: fly.pos.y, canvasWidthRatio: 0.05});
 
             // Clean up off-screen flies

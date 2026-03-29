@@ -138,7 +138,7 @@ full-width: true
           Ctx.reset();
           DrawBackground();
           DrawUI();
-          DrawEntities();
+          DrawEntities(deltaTimeMS);
         }
 
         function DrawBackground()
@@ -146,12 +146,12 @@ full-width: true
             DrawImage({src: document.getElementById("background"), x: 0.5, y: 0.5, canvasWidthRatio: 1.0, canvasHeightRatio: 1.0});
         }
 
-        function DrawEntities()
+        function DrawEntities(deltaTimeMS)
         {
-          froggy.update();
+          froggy.update(deltaTimeMS);
           if (currState == "InGame")
           {
-            flies.update();
+            flies.update(deltaTimeMS);
           }
         }
 
