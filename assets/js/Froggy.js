@@ -26,7 +26,6 @@ const froggy = {
         DrawImage({src: document.getElementById("frog"), x: froggy.getPos().x, y: froggy.getPos().y, canvasWidthRatio: 0.1});
         this.tongue.update();
     },
-
     
     tongue: {
         // properties of tongue
@@ -106,7 +105,7 @@ const froggy = {
                     flies.entities.splice(i, 1);
                     this.state = "idle"
                     document.getElementById("tongue-hit").play();
-                    flies.add(1, 0.2, 0.8, 0.1, 0.5);
+                    flies.add(1);
                 }
             }
 
@@ -119,26 +118,40 @@ const froggy = {
 };
 
 const flies = {
+    speed: 0.005,
+    spawnArea: {ymin: 0.05, ymax: 0.45},
     entities: [],
-    add: function(qty, xmin, xmax, ymin, ymax)
+    add: function(qty)
     {
-        const xrange = xmax - xmin;
-        const yrange = ymax - ymin;
+        const yrange = this.spawnArea.ymax - this.spawnArea.ymin;
         for (let i = 0; i < qty; i++)
         {
-            const randx = (Math.random() * xrange) + xmin;
-            const randy = (Math.random() * yrange) + ymin;
+            const randy = (Math.random() * yrange) + this.spawnArea.ymin;
+            const dir = (Math.random() * this.speed * 2.0) - (this.speed);
 
             this.entities.push({
-                pos: {x: randx, y: randy}
+                dir: dir,
+                pos: {x: dir > 0.0 ? 0.0 : 1.0, y: randy}
             })
         }
     },
     update: function()
     {
-        for (const fly of this.entities)
+        let i = flies.entities.length;
+        while (i--)
         {
+            const fly = flies.entities[i];
+            const halfSpeed = this.speed / 2.0;
+            fly.pos.x += (Math.random() * this.speed) - (halfSpeed) + fly.dir;
+            fly.pos.y += (Math.random() * halfSpeed) - (halfSpeed / 2.0);
             DrawImage({src: document.getElementById("fly"), x: fly.pos.x, y: fly.pos.y, canvasWidthRatio: 0.05});
+
+            // Clean up off-screen flies
+            if (fly.pos.x < 0.0 || fly.pos.x > 1.0)
+            {
+                flies.entities.splice(i, 1);
+                flies.add(1);
+            }
         }
     }
 };

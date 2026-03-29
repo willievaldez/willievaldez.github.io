@@ -261,7 +261,7 @@ function CacheState()
     {
         CurrState = 0;
     }
-    StateCache[CurrState] = Ctx.getImageData(0,0,Canvas.width, H = Canvas.height);
+    StateCache[CurrState] = Ctx.getImageData(0, 0, Canvas.width, Canvas.height);
 }
 
 function Undo()
