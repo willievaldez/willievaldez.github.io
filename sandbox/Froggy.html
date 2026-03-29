@@ -14,15 +14,29 @@ full-width: true
     <script src="/assets/js/CanvasHelpers.js"></script>
     <script src="/assets/js/PaintColors.js"></script>
     <script src="/assets/js/Froggy.js"></script>
+
     <img id="background" src="/assets/img/background2.png" hidden>
-    <img id="title" src="/assets/img/title.png" hidden>
     <img id="frog" src="/assets/img/whites_tree_frog.png" hidden>
     <img id="fly" src="/assets/img/fly.png" hidden>
+
+    <img id="title" src="/assets/img/title.png" hidden>
+    <img id="cursor" src="/assets/img/cursor.png" hidden>
     <img id="empty" src="/assets/img/empty.png" hidden>
+    <img id="settings" src="/assets/img/gear.png" hidden>
     <img id="play" src="/assets/img/play.png" hidden>
-    <audio id="ambient-music" src="/assets/audio/bg_music.wav" type="audio/wav"></audio>
-    <audio id="tongue-launch" src="/assets/audio/tongue_launch.wav" type="audio/wav"></audio>
-    <audio id="tongue-hit" src="/assets/audio/tongue_hit.wav" type="audio/wav"></audio>
+    <img id="music-ico" src="/assets/img/music.png" hidden>
+    <img id="no-music-ico" src="/assets/img/no_music.png" hidden>
+    <img id="sfx-ico" src="/assets/img/sound.png" hidden>
+    <img id="no-sfx-ico" src="/assets/img/no_sound.png" hidden>
+
+    <div id="music">
+      <audio id="ambient-music" src="/assets/audio/bg_music.wav" type="audio/wav"></audio>
+    </div>
+    <div id="sfx">
+      <audio id="tongue-launch" src="/assets/audio/tongue_launch.wav" type="audio/wav"></audio>
+      <audio id="tongue-hit" src="/assets/audio/tongue_hit.wav" type="audio/wav"></audio>
+    </div>
+
     <canvas id="canvas-view" style="cursor: none">
       Your browser does not seem to support HTML canvas.
     </canvas>
@@ -31,35 +45,90 @@ full-width: true
     </div>
     
     <script>
-        Initialize({canvasId: "canvas-view", width: 0.9, height: 0.8, widthRatio: 4, heightRatio: 3, drawFn: Update, onClick: OnClick, customCursor: {src: document.getElementById("fly"), canvasWidthRatio: 0.05} });
-        AddButton("Debug", {src: document.getElementById("empty"), x: 0.0, y: 0.0, canvasWidthRatio: 0.05}, function() {
-                      const debugDiv = document.getElementById("debug");
-                      debugDiv.hidden = !debugDiv.hidden;
-                    });
+        // Initialize the canvas
+        Initialize({canvasId: "canvas-view", width: 0.9, height: 0.8, widthRatio: 4, heightRatio: 3, drawFn: Update, onClick: OnClick, customCursor: {src: document.getElementById("cursor"), canvasWidthRatio: 0.05} });
+        
+        function ToggleMute(soundName, bMuted)
+        {
+            const soundDiv = document.getElementById(soundName);
+            localStorage[`${soundName}-muted`] = bMuted;
+            for (const child of soundDiv.children)
+            {
+              child.muted = bMuted;
+            }
 
+            const button = GetButton(soundName);
+            if (button)
+            {
+              button.src = bMuted ? document.getElementById(`no-${soundName}-ico`) : document.getElementById(`${soundName}-ico`);
+            }
+        }
+
+        // State management
         let currState = "";
         function ChangeState(newState)
         {
-          if (currState == "Init")
+          const prevState = currState;
+          currState = newState;
+
+          if (prevState == "Init")
           {
             RemoveButton("Play");
           }
+          if (prevState == "Settings")
+          {
+            RemoveButton("music");
+            RemoveButton("sfx");
+          }
 
-          currState = newState;
           if (currState == "Init")
           {
+            ToggleMute("music", localStorage["music-muted"] == 'true');
+            ToggleMute("sfx", localStorage["sfx-muted"] == 'true');
             AddButton("Play", {src: document.getElementById("play"), x: 0.7, y: 0.6, canvasWidthRatio: 0.4}, function() {
               ChangeState("InGame");
             });
           }
-          else if (currState == "InGame")
+          else if (currState == "Settings")
+          {
+            AddButton("music",
+              {src: localStorage["music-muted"] == 'true' ? document.getElementById("no-music-ico") : document.getElementById("music-ico"),
+                x: 0.1, y: 0.1, canvasWidthRatio: 0.05, toggleState: localStorage["music-muted"] == 'true'},
+              function() {ToggleMute("music", this.toggleState);});
+            AddButton("sfx",
+              {src: localStorage["sfx-muted"] == 'true' ? document.getElementById("no-sfx-ico") : document.getElementById("sfx-ico"),
+                x: 0.1, y: 0.2, canvasWidthRatio: 0.05, toggleState: localStorage["sfx-muted"] == 'true'},
+              function() {ToggleMute("sfx", this.toggleState);});
+          }
+          else if (currState == "InGame" && prevState != "Settings")
           {
             document.getElementById("ambient-music").play();
             flies.add(1, 0.2, 0.8, 0.1, 0.5);
           }
         }
 
+        // Initialize the game loop
         ChangeState("Init");
+
+        // Add some persistent buttons
+        AddButton("Debug", {src: document.getElementById("empty"), x: 0.0, y: 0.0, canvasWidthRatio: 0.05}, function() {
+                      const debugDiv = document.getElementById("debug");
+                      debugDiv.hidden = !debugDiv.hidden;
+                    });
+
+        let cachedState = null;
+        AddButton("Settings", {src: document.getElementById("settings"), x: 0.95, y: 0.95, canvasWidthRatio: 0.05, toggleState: false}, function() {
+                      if (currState != "Settings")
+                      {
+                        cachedState = currState;
+                        ChangeState("Settings");
+                      }
+                      else
+                      {
+                        ChangeState(cachedState);
+                      }
+                    });
+
 
         function Update(deltaTimeMS)
         {
@@ -79,8 +148,11 @@ full-width: true
 
         function DrawEntities()
         {
-            froggy.update();
+          froggy.update();
+          if (currState == "InGame")
+          {
             flies.update();
+          }
         }
 
         function DrawUI()

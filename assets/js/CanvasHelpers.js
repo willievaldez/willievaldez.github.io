@@ -62,7 +62,7 @@ function Initialize(inParams)
                 }
                 
                 DrawImage(CanvasButtons[buttonName]);
-                Ctx.filter = "";
+                Ctx.filter = "none";
             }
 
             if (InitParams.customCursor && !MouseState.bTouch)
@@ -182,7 +182,7 @@ function AddMouseListeners()
         MouseState.bTouch = false;
     }, false);
     Canvas.addEventListener('touchstart', function(evt) {
-        event.preventDefault();
+        evt.preventDefault();
         
         var rect = Canvas.getBoundingClientRect();
         let rectWidth = rect.right - rect.left;
@@ -206,15 +206,20 @@ function AddMouseListeners()
 
             for (let buttonName in CanvasButtons)
             {
-                const {dWidth, dHeight} = TransformWidthHeight(CanvasButtons[buttonName]);
+                const button = CanvasButtons[buttonName];
+                const {dWidth, dHeight} = TransformWidthHeight(button);
                 const {x, y} = TransformPosition(CanvasButtons[buttonName], dWidth, dHeight);
                 const mousePos = TransformPosition(MouseState.pos);
 
                 if (mousePos.x > x && mousePos.x - x < dWidth && mousePos.y > y && mousePos.y - y < dHeight)
                 {
-                    if (MouseState.bPressed && CanvasButtons[buttonName].onclick)
+                    if (MouseState.bPressed)
                     {
-                        CanvasButtons[buttonName].onclick();
+                        button.toggleState = !button.toggleState;
+                        if (button.onclick)
+                        {
+                            button.onclick();
+                        }
                     }
                 }
             }
@@ -290,9 +295,14 @@ function SetupUndo()
 
 function AddButton(buttonName, inParams, onclickFn = null)
 {
-    const defaultParams = {src: null, x: 0, y: 0, centered: true, canvasWidthRatio: null, canvasHeightRatio: null, onclick: onclickFn};
+    const defaultParams = {src: null, x: 0, y: 0, centered: true, canvasWidthRatio: null, canvasHeightRatio: null, toggleState: null, onclick: onclickFn};
     const params = Object.assign(defaultParams, inParams);
     CanvasButtons[buttonName] = params;
+}
+
+function GetButton(buttonName)
+{
+    return CanvasButtons[buttonName]
 }
 
 function RemoveButton(buttonName)
