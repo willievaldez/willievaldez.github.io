@@ -30,7 +30,7 @@ full-width: true
     <img id="no-sfx-ico" src="/assets/img/no_sound.png" hidden>
 
     <div id="music">
-      <audio id="ambient-music" src="/assets/audio/bg_music.wav" type="audio/wav"></audio>
+      <audio id="ambient-music" src="/assets/audio/bg_music.wav" type="audio/wav" loop></audio>
     </div>
     <div id="sfx">
       <audio id="tongue-launch" src="/assets/audio/tongue_launch.wav" type="audio/wav"></audio>
@@ -48,12 +48,13 @@ full-width: true
         // Initialize the canvas
         Initialize({canvasId: "canvas-view", width: 0.9, height: 0.8, widthRatio: 4, heightRatio: 3, drawFn: Update, onClick: OnClick, customCursor: {src: document.getElementById("cursor"), canvasWidthRatio: 0.05} });
         
-        function ToggleMute(soundName, bMuted)
+        function ToggleMute(soundName, bMuted, volume=1.0)
         {
             const soundDiv = document.getElementById(soundName);
             localStorage[`${soundName}-muted`] = bMuted;
             for (const child of soundDiv.children)
             {
+              child.volume = volume;
               child.muted = bMuted;
             }
 
@@ -83,8 +84,8 @@ full-width: true
 
           if (currState == "Init")
           {
-            ToggleMute("music", localStorage["music-muted"] == 'true');
-            ToggleMute("sfx", localStorage["sfx-muted"] == 'true');
+            ToggleMute("music", localStorage["music-muted"] == 'true', 0.2);
+            ToggleMute("sfx", localStorage["sfx-muted"] == 'true', 0.6);
             AddButton("Play", {src: document.getElementById("play"), x: 0.7, y: 0.6, canvasWidthRatio: 0.4}, function() {
               ChangeState("InGame");
             });

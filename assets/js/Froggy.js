@@ -103,7 +103,12 @@ const froggy = {
                 {
                     flies.entities.splice(i, 1);
                     this.state = "idle"
-                    document.getElementById("tongue-hit").play();
+
+                    const sound = document.getElementById("tongue-hit");
+                    sound.pause();
+                    sound.currentTime = 0;
+                    sound.play();
+                    
                     flies.add(1);
                 }
             }
