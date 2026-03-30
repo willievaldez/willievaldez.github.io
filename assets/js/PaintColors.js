@@ -34,7 +34,7 @@ function ToHex(dec)
 
 function SetSelectedSliderData(palleteNum)
 {
-    document.querySelector(`#pallete-${localStorage.currentPallete}`).className = "";
+    document.querySelector(`#pallete-${localStorage.currentPallete}`).className = "not-selected";
     localStorage.currentPallete = palleteNum;
     const eraser = palleteNum == 9;
     document.querySelector(`#pallete-${localStorage.currentPallete}`).className = "selected";
