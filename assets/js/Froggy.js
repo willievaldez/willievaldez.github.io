@@ -103,6 +103,10 @@ const froggy = {
                     flies.entities.splice(i, 1);
                     this.state = "idle"
 
+                    if (!localStorage.flyCount)
+                    {
+                        localStorage.flyCount = "0";
+                    }
                     localStorage.flyCount = (parseInt(localStorage.flyCount) + 1).toString();
 
                     const sound = document.getElementById("tongue-hit");
