@@ -60,7 +60,6 @@ const froggy = {
             }
 
             const sound = document.getElementById("tongue-launch");
-            sound.pause();
             sound.currentTime = 0;
             sound.play();
 
@@ -97,19 +96,27 @@ const froggy = {
             let i = flies.entities.length;
             while (i--)
             {
-                const flyPos = flies.entities[i].pos;
-                const sqDist = Math.pow(flyPos.x - (tongueTip.x / Canvas.width), 2) + Math.pow(flyPos.y - (tongueTip.y / Canvas.height), 2);
+                const fly = flies.entities[i];
+                const sqDist = Math.pow(fly.pos.x - (tongueTip.x / Canvas.width), 2) + Math.pow(fly.pos.y - (tongueTip.y / Canvas.height), 2);
                 if (sqDist < 0.001)
                 {
                     flies.entities.splice(i, 1);
                     this.state = "idle"
 
+                    localStorage.flyCount = (parseInt(localStorage.flyCount) + 1).toString();
+
                     const sound = document.getElementById("tongue-hit");
-                    sound.pause();
                     sound.currentTime = 0;
                     sound.play();
                     
-                    flies.add(1);
+                    if (fly.onCaught)
+                    {
+                        fly.onCaught();
+                    }
+                    else
+                    {
+                        flies.add(1);
+                    }
                 }
             }
 
@@ -123,19 +130,33 @@ const froggy = {
 
 const flies = {
     speed: 0.25,
-    spawnArea: {ymin: 0.05, ymax: 0.45},
     entities: [],
-    add: function(qty)
+    add: function(qty, inParams = {})
     {
-        const yrange = this.spawnArea.ymax - this.spawnArea.ymin;
+        const defaultParams = {xmin: null, xmax: null, ymin: 0.05, ymax: 0.45, dir: null, onCaught: null};
+        const params = Object.assign(defaultParams, inParams);
+
+        const xrange = params.xmax - params.xmin;
+        const yrange = params.ymax - params.ymin;
         for (let i = 0; i < qty; i++)
         {
-            const randy = (Math.random() * yrange) + this.spawnArea.ymin;
-            const dir = (Math.random() * this.speed * 2.0) - (this.speed);
+            let dir = params.dir;
+            if (dir == null)
+            {
+                dir = (Math.random() * this.speed * 2.0) - (this.speed);
+            }
+
+            let x = dir > 0.0 ? 0.0 : 1.0;
+            if (params.xmin != null && params.xmax != null)
+            {
+                x = (Math.random() * xrange) + params.xmin;
+            }
+            const randy = (Math.random() * yrange) + params.ymin;
 
             this.entities.push({
                 dir: dir,
-                pos: {x: dir > 0.0 ? 0.0 : 1.0, y: randy}
+                pos: {x: x, y: randy},
+                onCaught: params.onCaught
             })
         }
     },
@@ -149,7 +170,7 @@ const flies = {
             const halfSpeed = this.speed / 2.0;
             fly.pos.x += ((Math.random() * this.speed) - (halfSpeed) + fly.dir) * deltaTimeSecs;
             fly.pos.y += ((Math.random() * halfSpeed) - (halfSpeed / 2.0)) * deltaTimeSecs;
-            DrawImage({src: document.getElementById("fly"), x: fly.pos.x, y: fly.pos.y, canvasWidthRatio: 0.05});
+            DrawImage({src: document.getElementById("fly"), x: fly.pos.x, y: fly.pos.y, flipX: fly.dir < 0.0, canvasWidthRatio: 0.05});
 
             // Clean up off-screen flies
             if (fly.pos.x < 0.0 || fly.pos.x > 1.0)

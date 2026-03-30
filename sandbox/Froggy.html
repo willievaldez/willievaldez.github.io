@@ -23,11 +23,24 @@ full-width: true
     <img id="cursor" src="/assets/img/cursor.png" hidden>
     <img id="empty" src="/assets/img/empty.png" hidden>
     <img id="settings" src="/assets/img/gear.png" hidden>
-    <img id="play" src="/assets/img/play.png" hidden>
     <img id="music-ico" src="/assets/img/music.png" hidden>
     <img id="no-music-ico" src="/assets/img/no_music.png" hidden>
     <img id="sfx-ico" src="/assets/img/sound.png" hidden>
     <img id="no-sfx-ico" src="/assets/img/no_sound.png" hidden>
+    <img id="delete" src="/assets/img/no_save.png" hidden>
+    <img id="accept" src="/assets/img/accept.png" hidden>
+    <img id="cancel" src="/assets/img/cancel.png" hidden>
+    
+    <img id="num-0" src="/assets/img/alphanum/0.png" hidden>
+    <img id="num-1" src="/assets/img/alphanum/1.png" hidden>
+    <img id="num-2" src="/assets/img/alphanum/2.png" hidden>
+    <img id="num-3" src="/assets/img/alphanum/3.png" hidden>
+    <img id="num-4" src="/assets/img/alphanum/4.png" hidden>
+    <img id="num-5" src="/assets/img/alphanum/5.png" hidden>
+    <img id="num-6" src="/assets/img/alphanum/6.png" hidden>
+    <img id="num-7" src="/assets/img/alphanum/7.png" hidden>
+    <img id="num-8" src="/assets/img/alphanum/8.png" hidden>
+    <img id="num-9" src="/assets/img/alphanum/9.png" hidden>
 
     <div id="music">
       <audio id="ambient-music" src="/assets/audio/bg_music.wav" type="audio/wav" loop></audio>
@@ -72,23 +85,19 @@ full-width: true
           const prevState = currState;
           currState = newState;
 
-          if (prevState == "Init")
-          {
-            RemoveButton("Play");
-          }
           if (prevState == "Settings")
           {
             RemoveButton("music");
             RemoveButton("sfx");
+            RemoveButton("delete");
           }
 
-          if (currState == "Init")
+          if (currState == "Init" && prevState != "Settings")
           {
             ToggleMute("music", localStorage["music-muted"] == 'true', 0.2);
             ToggleMute("sfx", localStorage["sfx-muted"] == 'true', 0.6);
-            AddButton("Play", {src: document.getElementById("play"), x: 0.7, y: 0.6, canvasWidthRatio: 0.4}, function() {
-              ChangeState("InGame");
-            });
+
+            flies.add(1, {xmin: 0.7, xmax: 0.7, ymin: 0.6, ymax: 0.6, dir: 0.0, onCaught: function(){ChangeState("InGame");}});
           }
           else if (currState == "Settings")
           {
@@ -100,11 +109,31 @@ full-width: true
               {src: localStorage["sfx-muted"] == 'true' ? document.getElementById("no-sfx-ico") : document.getElementById("sfx-ico"),
                 x: 0.1, y: 0.2, canvasWidthRatio: 0.05, toggleState: localStorage["sfx-muted"] == 'true'},
               function() {ToggleMute("sfx", this.toggleState);});
+            AddButton("delete", {src: document.getElementById("delete"), x: 0.05, y: 0.85, canvasWidthRatio: 0.05},
+              function() {
+                const cachedFlyCount = localStorage.flyCount;
+                localStorage.flyCount = "0";
+                AddButton("accept", {src: document.getElementById("accept"), x: 0.15, y: 0.85, canvasWidthRatio: 0.05},
+                  function() {
+                    RemoveButton("accept");
+                    RemoveButton("cancel");
+                  });
+                AddButton("cancel", {src: document.getElementById("cancel"), x: 0.25, y: 0.85, canvasWidthRatio: 0.05},
+                  function() {
+                    localStorage.flyCount = cachedFlyCount;
+                    RemoveButton("accept");
+                    RemoveButton("cancel");
+                  });
+              });
           }
           else if (currState == "InGame" && prevState != "Settings")
           {
             document.getElementById("ambient-music").play();
-            flies.add(10);
+
+            for (let i = 0; i < 10; ++i)
+            {
+              setTimeout(function(){flies.add(1);}, i * 1000);
+            }
           }
         }
 
@@ -150,7 +179,7 @@ full-width: true
         function DrawEntities(deltaTimeMS)
         {
           froggy.update(deltaTimeMS);
-          if (currState == "InGame")
+          if (currState != "Settings")
           {
             flies.update(deltaTimeMS);
           }
@@ -161,6 +190,26 @@ full-width: true
           if (currState == "Init")
           {
             DrawImage({src: document.getElementById("title"), x: 0.5, y: 0.2, canvasWidthRatio: 0.8});
+          }
+          else
+          {
+            DrawScore(0.05, 0.95);
+          }
+
+          if (currState == "InGame")
+          {
+            if (!localStorage.flyCount)
+            {
+              localStorage.flyCount = "0";
+            }
+          }
+        }
+
+        function DrawScore(x, y)
+        {
+          for (let i = 0; i < localStorage.flyCount.length; i++)
+          {
+            DrawImage({src: document.getElementById(`num-${localStorage.flyCount[i]}`), x: x + (0.04 * i), y: y, canvasWidthRatio: 0.05});
           }
         }
 

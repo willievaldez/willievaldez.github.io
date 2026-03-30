@@ -4,6 +4,7 @@ let Ctx = null;
 const InitParams = {
     canvasId: null,
     drawFn: null,
+    maxTickDeltaMS: 300,
     width: 0.8,
     widthType: "%",
     widthId: null,
@@ -47,7 +48,8 @@ function Initialize(inParams)
         if (InitParams.drawFn)
         {
             const currTick = Date.now();
-            InitParams.drawFn(currTick - lastTick);
+            const deltaTimeMS = currTick - lastTick;
+            InitParams.drawFn(deltaTimeMS > InitParams.maxTickDeltaMS ? InitParams.maxTickDeltaMS : deltaTimeMS);
             lastTick = currTick;
 
             for (let buttonName in CanvasButtons)
@@ -424,12 +426,15 @@ function TransformPosition(params, dWidth, dHeight)
 
 function DrawImage(inParams)
 {
-    const defaultParams = {src: null, x: 0, y: 0, centered: true, canvasWidthRatio: null, canvasHeightRatio: null};
+    const defaultParams = {src: null, x: 0, y: 0, centered: true, canvasWidthRatio: null, canvasHeightRatio: null, flipX: false, flipY: false};
     const params = Object.assign(defaultParams, inParams);
 
     const {dWidth, dHeight} = TransformWidthHeight(params);
     const {x, y} = TransformPosition(params, dWidth, dHeight);
 
     Ctx.resetTransform();
-    Ctx.drawImage(params.src, Math.round(x), Math.round(y), dWidth, dHeight);
+    Ctx.translate(Math.round(x), Math.round(y));
+    Ctx.scale(params.flipX ? -1 : 1, params.flipY ? -1 : 1);
+    Ctx.drawImage(params.src, params.flipX ? dWidth * -1 : 0, params.flipY ? dHeight * -1 : 0, dWidth, dHeight);
+    Ctx.resetTransform();
 }
