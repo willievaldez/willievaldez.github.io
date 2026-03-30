@@ -195,18 +195,15 @@ full-width: true
           {
             DrawScore(0.05, 0.95);
           }
-
-          if (currState == "InGame")
-          {
-            if (!localStorage.flyCount)
-            {
-              localStorage.flyCount = "0";
-            }
-          }
         }
 
         function DrawScore(x, y)
         {
+          if (!localStorage.flyCount)
+          {
+            localStorage.flyCount = "0";
+          }
+          
           for (let i = 0; i < localStorage.flyCount.length; i++)
           {
             DrawImage({src: document.getElementById(`num-${localStorage.flyCount[i]}`), x: x + (0.04 * i), y: y, canvasWidthRatio: 0.05});
