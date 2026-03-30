@@ -214,7 +214,7 @@ full-width: true
 
         function DrawScore(x, y)
         {
-          if (!localStorage.flyCount)
+          if (!localStorage.flyCount || localStorage.flyCount == "NaN")
           {
             localStorage.flyCount = "0";
           }

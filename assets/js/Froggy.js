@@ -100,14 +100,14 @@ const froggy = {
                 const sqDist = Math.pow(fly.pos.x - (tongueTip.x / Canvas.width), 2) + Math.pow(fly.pos.y - (tongueTip.y / Canvas.height), 2);
                 if (sqDist < 0.001)
                 {
-                    flies.entities.splice(i, 1);
-                    this.state = "idle"
-
-                    if (!localStorage.flyCount)
+                    if (!localStorage.flyCount || localStorage.flyCount == "NaN")
                     {
                         localStorage.flyCount = "0";
                     }
-                    localStorage.flyCount = (parseInt(localStorage.flyCount) + 1).toString();
+                    localStorage.flyCount = (parseInt(localStorage.flyCount) + (flies.isSpecial(i) ? 5 : 1)).toString();
+
+                    flies.entities.splice(i, 1);
+                    this.state = "idle"
 
                     const sound = document.getElementById("tongue-hit");
                     sound.currentTime = 0;
@@ -135,6 +135,7 @@ const froggy = {
 const flies = {
     speed: 0.25,
     entities: [],
+    isSpecial: function(i) {return this.entities[i].dir > this.speed / 2.0;},
     add: function(qty, inParams = {})
     {
         const defaultParams = {xmin: null, xmax: null, ymin: 0.05, ymax: 0.45, dir: null, onCaught: null};
@@ -174,7 +175,13 @@ const flies = {
             const halfSpeed = this.speed / 2.0;
             fly.pos.x += ((Math.random() * this.speed) - (halfSpeed) + fly.dir) * deltaTimeSecs;
             fly.pos.y += ((Math.random() * halfSpeed) - (halfSpeed / 2.0)) * deltaTimeSecs;
+
+            if (this.isSpecial(i))
+            {
+                Ctx.filter = `hue-rotate(${fly.pos.x * 4 * 360}deg)`;
+            }
             DrawImage({src: document.getElementById("fly"), x: fly.pos.x, y: fly.pos.y, flipX: fly.dir < 0.0, canvasWidthRatio: 0.05});
+            Ctx.filter = "none";
 
             // Clean up off-screen flies
             if (fly.pos.x < 0.0 || fly.pos.x > 1.0)
