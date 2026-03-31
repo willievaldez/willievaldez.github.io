@@ -176,37 +176,29 @@ full-width: true
                       }
                     });
 
-        const AddExpand = function()
-        {
-          AddButton("Expand", {src: document.getElementById("expand"), x: 0.85, y: 0.95, canvasWidthRatio: 0.05}, function() {
-              RemoveButton("Expand");
-              if(Canvas.requestFullScreen)
-                  Canvas.requestFullScreen();
-              else if(Canvas.webkitRequestFullScreen)
-                  Canvas.webkitRequestFullScreen();
-              else if(Canvas.mozRequestFullScreen)
-                  Canvas.mozRequestFullScreen();
+        AddButton("Fullscreen", {src: document.getElementById("expand"), x: 0.85, y: 0.95, canvasWidthRatio: 0.05}, function() {
+              if (IsFullScreen())
+              {
+                GetButton("Fullscreen").src = document.getElementById("expand");
+                if(document.exitFullscreen)
+                    document.exitFullscreen();
+                else if(document.webkitExitFullscreen)
+                    document.webkitExitFullscreen();
+                else if(document.msExitFullscreen)
+                    document.msExitFullscreen();
+              }
+              else
+              {
+                GetButton("Fullscreen").src = document.getElementById("contract");
+                if(Canvas.requestFullScreen)
+                    Canvas.requestFullScreen();
+                else if(Canvas.webkitRequestFullScreen)
+                    Canvas.webkitRequestFullScreen();
+                else if(Canvas.mozRequestFullScreen)
+                    Canvas.mozRequestFullScreen();
+              }
 
-              AddContract();
             });
-        }
-
-        const AddContract = function()
-        {
-          AddButton("Contract", {src: document.getElementById("contract"), x: 0.85, y: 0.95, canvasWidthRatio: 0.05}, function() {
-              RemoveButton("Contract");
-              if(document.exitFullscreen)
-                  document.exitFullscreen();
-              else if(document.webkitExitFullscreen)
-                  document.webkitExitFullscreen();
-              else if(document.msExitFullscreen)
-                  document.msExitFullscreen();
-                
-              AddExpand();
-            });
-        }
-
-        AddExpand();
 
         function Update(deltaTimeMS)
         {
@@ -221,7 +213,7 @@ full-width: true
 
         function DrawBackground()
         {
-            DrawImage({src: document.getElementById("background"), x: 0.5, y: 0.5, canvasWidthRatio: 1.0, canvasHeightRatio: 1.0});
+            DrawImage({src: document.getElementById("background"), x: 0, y: 0, canvasWidthRatio: 1.0, canvasHeightRatio: 1.0, centered: false});
         }
 
         function DrawEntities(deltaTimeMS)

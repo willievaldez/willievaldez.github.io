@@ -103,16 +103,29 @@ function Resize(inParams)
     ResizeCanvas();
 }
 
+function IsFullScreen()
+{
+    return document.fullscreenElement == Canvas;
+}
+
 function ResizeCanvas()
 {
     let newWidth = InitParams.width;
-    if (InitParams.widthType == "%")
+    if (IsFullScreen())
+    {
+        newWidth = window.innerWidth;
+    }
+    else if (InitParams.widthType == "%")
     {
         newWidth = window.innerWidth * InitParams.width;
     }
 
     let newHeight = InitParams.height;
-    if (InitParams.heightType == "%")
+    if (IsFullScreen())
+    {
+        newHeight = window.innerHeight;
+    }
+    else if (InitParams.heightType == "%")
     {
         newHeight = window.innerHeight * InitParams.height;
     }
@@ -153,30 +166,32 @@ function AddResizeListener()
 
 function AddMouseListeners()
 {
-    Canvas.addEventListener('mousemove', function(evt) {
+    function SetCursorPos(x, y, bTouch)
+    {
         var rect = Canvas.getBoundingClientRect();
-        let rectWidth = rect.right - rect.left;
-        let rectHeight = rect.bottom - rect.top; 
-        MouseState.pos = {
-            x: (evt.clientX - rect.left) / rectWidth,
-            y: (evt.clientY - rect.top) / rectHeight
-        };
-        MouseState.bTouch = false;
+        let widthOffset = Canvas.offsetLeft + ((rect.right - rect.left - Canvas.width) / 2.0);
+        let heightOffset = Canvas.offsetTop + ((rect.bottom - rect.top - Canvas.height) / 2.0);
+        if (x > widthOffset && x < Canvas.width + widthOffset
+            && y > heightOffset && y < Canvas.height + heightOffset)
+        {
+            MouseState.pos = {
+                x: (x - widthOffset) / Canvas.width,
+                y: (y - heightOffset) / Canvas.height
+            };
+            MouseState.bTouch = bTouch;
+        }
+    }
+
+    Canvas.addEventListener('mousemove', function(evt) {
+        SetCursorPos(evt.clientX, evt.clientY, false);
     }, false);
     
     Canvas.addEventListener('touchmove', function(evt) {
-        var rect = Canvas.getBoundingClientRect();
-        let rectWidth = rect.right - rect.left;
-        let rectHeight = rect.bottom - rect.top; 
         for (const changedTouch of evt.changedTouches) {
-            MouseState.pos = {
-                x: (changedTouch.pageX - rect.left - window.scrollX) / rectWidth,
-                y: (changedTouch.pageY - rect.top - window.scrollY) / rectHeight
-            };
+            SetCursorPos(changedTouch.pageX - window.scrollX, changedTouch.pageY - window.scrollY, true);
             break;
         }
         MouseState.bPressed = true;
-        MouseState.bTouch = true;
     }, false);
     
     Canvas.addEventListener('mousedown', function(evt) {
@@ -185,19 +200,11 @@ function AddMouseListeners()
     }, false);
     Canvas.addEventListener('touchstart', function(evt) {
         evt.preventDefault();
-        
-        var rect = Canvas.getBoundingClientRect();
-        let rectWidth = rect.right - rect.left;
-        let rectHeight = rect.bottom - rect.top; 
         for (const changedTouch of evt.changedTouches) {
-            MouseState.pos = {
-                x: (changedTouch.pageX - rect.left - window.scrollX) / rectWidth,
-                y: (changedTouch.pageY - rect.top - window.scrollY) / rectHeight
-            };
+            SetCursorPos(changedTouch.pageX - window.scrollX, changedTouch.pageY - window.scrollY, true);
             break;
         }
         MouseState.bPressed = true;
-        MouseState.bTouch = true;
     }, false);
 
     function EventEnd(bTouch)
