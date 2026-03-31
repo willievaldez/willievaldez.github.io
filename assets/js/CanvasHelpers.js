@@ -169,8 +169,8 @@ function AddMouseListeners()
     function SetCursorPos(x, y, bTouch)
     {
         var rect = Canvas.getBoundingClientRect();
-        let widthOffset = Canvas.offsetLeft + ((rect.right - rect.left - Canvas.width) / 2.0);
-        let heightOffset = Canvas.offsetTop + ((rect.bottom - rect.top - Canvas.height) / 2.0);
+        let widthOffset = rect.left + ((rect.right - rect.left - Canvas.width) / 2.0);
+        let heightOffset = rect.top + ((rect.bottom - rect.top - Canvas.height) / 2.0);
         if (x > widthOffset && x < Canvas.width + widthOffset
             && y > heightOffset && y < Canvas.height + heightOffset)
         {
