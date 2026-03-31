@@ -22,7 +22,8 @@ full-width: true
     <img id="title" src="/assets/img/title.png" hidden>
     <img id="cursor" src="/assets/img/cursor.png" hidden>
     <img id="empty" src="/assets/img/empty.png" hidden>
-    <img id="settings" src="/assets/img/gear.png" hidden>
+    <img id="pause" src="/assets/img/pause.png" hidden>
+    <img id="play" src="/assets/img/play.png" hidden>
     <img id="music-ico" src="/assets/img/music.png" hidden>
     <img id="no-music-ico" src="/assets/img/no_music.png" hidden>
     <img id="sfx-ico" src="/assets/img/sound.png" hidden>
@@ -102,29 +103,30 @@ full-width: true
           const prevState = currState;
           currState = newState;
 
-          if (prevState == "Settings")
+          if (prevState == "Pause")
           {
             RemoveButton("music");
             RemoveButton("sfx");
             RemoveButton("delete");
+            RemoveButton("fullscreen");
           }
 
-          if (currState == "Init" && prevState != "Settings")
+          if (currState == "Init" && prevState != "Pause")
           {
             ToggleMute("music", localStorage["music-muted"] == 'true', 0.2);
             ToggleMute("sfx", localStorage["sfx-muted"] == 'true', 0.6);
 
             flies.add(1, {xmin: 0.7, xmax: 0.7, ymin: 0.6, ymax: 0.6, dir: 0.0, onCaught: function(){ChangeState("InGame");}});
           }
-          else if (currState == "Settings")
+          else if (currState == "Pause")
           {
             AddButton("music",
               {src: localStorage["music-muted"] == 'true' ? document.getElementById("no-music-ico") : document.getElementById("music-ico"),
-                x: 0.1, y: 0.1, canvasWidthRatio: 0.05, toggleState: localStorage["music-muted"] == 'true'},
+                x: 0.95, y: 0.85, canvasWidthRatio: 0.05, toggleState: localStorage["music-muted"] == 'true'},
               function() {ToggleMute("music", this.toggleState);});
             AddButton("sfx",
               {src: localStorage["sfx-muted"] == 'true' ? document.getElementById("no-sfx-ico") : document.getElementById("sfx-ico"),
-                x: 0.1, y: 0.2, canvasWidthRatio: 0.05, toggleState: localStorage["sfx-muted"] == 'true'},
+                x: 0.95, y: 0.75, canvasWidthRatio: 0.05, toggleState: localStorage["sfx-muted"] == 'true'},
               function() {ToggleMute("sfx", this.toggleState);});
             AddButton("delete", {src: document.getElementById("delete"), x: 0.05, y: 0.85, canvasWidthRatio: 0.05},
               function() {
@@ -142,8 +144,33 @@ full-width: true
                     RemoveButton("cancel");
                   });
               });
+              
+            AddButton("fullscreen", {src: document.getElementById("expand"), x: 0.95, y: 0.05, canvasWidthRatio: 0.05}, function() {
+                  if (IsFullScreen())
+                  {
+                    GetButton("fullscreen").src = document.getElementById("expand");
+                    if(document.exitFullscreen)
+                        document.exitFullscreen();
+                    else if(document.webkitExitFullscreen)
+                        document.webkitExitFullscreen();
+                    else if(document.msExitFullscreen)
+                        document.msExitFullscreen();
+                  }
+                  else
+                  {
+                    GetButton("fullscreen").src = document.getElementById("contract");
+                    if(Canvas.requestFullScreen)
+                        Canvas.requestFullScreen();
+                    else if(Canvas.webkitRequestFullScreen)
+                        Canvas.webkitRequestFullScreen();
+                    else if(Canvas.mozRequestFullScreen)
+                        Canvas.mozRequestFullScreen();
+                  }
+
+                });
+
           }
-          else if (currState == "InGame" && prevState != "Settings")
+          else if (currState == "InGame" && prevState != "Pause")
           {
             document.getElementById("ambient-music").play();
 
@@ -164,41 +191,19 @@ full-width: true
                     });
 
         let cachedState = null;
-        AddButton("Settings", {src: document.getElementById("settings"), x: 0.95, y: 0.95, canvasWidthRatio: 0.05, toggleState: false}, function() {
-                      if (currState != "Settings")
+        AddButton("Pause", {src: document.getElementById("pause"), x: 0.95, y: 0.95, canvasWidthRatio: 0.05, toggleState: false}, function() {
+                      if (currState != "Pause")
                       {
+                        GetButton("Pause").src = document.getElementById("play");
                         cachedState = currState;
-                        ChangeState("Settings");
+                        ChangeState("Pause");
                       }
                       else
                       {
+                        GetButton("Pause").src = document.getElementById("pause");
                         ChangeState(cachedState);
                       }
                     });
-
-        AddButton("Fullscreen", {src: document.getElementById("expand"), x: 0.85, y: 0.95, canvasWidthRatio: 0.05}, function() {
-              if (IsFullScreen())
-              {
-                GetButton("Fullscreen").src = document.getElementById("expand");
-                if(document.exitFullscreen)
-                    document.exitFullscreen();
-                else if(document.webkitExitFullscreen)
-                    document.webkitExitFullscreen();
-                else if(document.msExitFullscreen)
-                    document.msExitFullscreen();
-              }
-              else
-              {
-                GetButton("Fullscreen").src = document.getElementById("contract");
-                if(Canvas.requestFullScreen)
-                    Canvas.requestFullScreen();
-                else if(Canvas.webkitRequestFullScreen)
-                    Canvas.webkitRequestFullScreen();
-                else if(Canvas.mozRequestFullScreen)
-                    Canvas.mozRequestFullScreen();
-              }
-
-            });
 
         function Update(deltaTimeMS)
         {
@@ -219,7 +224,7 @@ full-width: true
         function DrawEntities(deltaTimeMS)
         {
           froggy.update(deltaTimeMS);
-          if (currState != "Settings")
+          if (currState != "Pause")
           {
             flies.update(deltaTimeMS);
           }
