@@ -30,6 +30,8 @@ full-width: true
     <img id="delete" src="/assets/img/no_save.png" hidden>
     <img id="accept" src="/assets/img/accept.png" hidden>
     <img id="cancel" src="/assets/img/cancel.png" hidden>
+    <img id="expand" src="/assets/img/expand.png" hidden>
+    <img id="contract" src="/assets/img/contract.png" hidden>
     
     <img id="num-0" src="/assets/img/alphanum/0.png" hidden>
     <img id="num-1" src="/assets/img/alphanum/1.png" hidden>
@@ -174,6 +176,37 @@ full-width: true
                       }
                     });
 
+        const AddExpand = function()
+        {
+          AddButton("Expand", {src: document.getElementById("expand"), x: 0.85, y: 0.95, canvasWidthRatio: 0.05}, function() {
+              RemoveButton("Expand");
+              if(Canvas.requestFullScreen)
+                  Canvas.requestFullScreen();
+              else if(Canvas.webkitRequestFullScreen)
+                  Canvas.webkitRequestFullScreen();
+              else if(Canvas.mozRequestFullScreen)
+                  Canvas.mozRequestFullScreen();
+
+              AddContract();
+            });
+        }
+
+        const AddContract = function()
+        {
+          AddButton("Contract", {src: document.getElementById("contract"), x: 0.85, y: 0.95, canvasWidthRatio: 0.05}, function() {
+              RemoveButton("Contract");
+              if(document.exitFullscreen)
+                  document.exitFullscreen();
+              else if(document.webkitExitFullscreen)
+                  document.webkitExitFullscreen();
+              else if(document.msExitFullscreen)
+                  document.msExitFullscreen();
+                
+              AddExpand();
+            });
+        }
+
+        AddExpand();
 
         function Update(deltaTimeMS)
         {

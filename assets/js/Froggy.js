@@ -135,7 +135,7 @@ const froggy = {
 const flies = {
     speed: 0.25,
     entities: [],
-    isSpecial: function(i) {return this.entities[i].dir > this.speed / 2.0;},
+    isSpecial: function(i) {return Math.abs(this.entities[i].dir) > this.speed / 1.25;},
     add: function(qty, inParams = {})
     {
         const defaultParams = {xmin: null, xmax: null, ymin: 0.05, ymax: 0.45, dir: null, onCaught: null};
